@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Audio Player</string>
+
+    <!-- -->
+    <string name="audio_play_list">播放列表</string>
+    <string name="audio_play_lyrics">歌词显示</string>
+    <string name="audio_play_settings">音乐设置</string>
+
+    <!-- 控制面板显示的文字 -->
+    <string name="audio_display_name">歌名</string>
+    <string name="audio_singer_name">歌手</string>
+    <string name="audio_start_time_text">00:00</string>
+    <string name="audio_total_time_text">03:00</string>
+
+    <!-- -->
+    <string name="audio_order_id_text">001</string>
+    <string name="audio_info_text">歌手|专辑</string>
+    <string name="audio_time_text">00:00</string>
+
+</resources>

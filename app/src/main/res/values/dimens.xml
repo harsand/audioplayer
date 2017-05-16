@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+     <dimen name="player_tag_padding">5dp</dimen>
+     <dimen name="player_tag_text_size">20sp</dimen>
+
+    <dimen name="audio_control_padding">3dp</dimen>
+    <dimen name="audio_control_padding_left">5dp</dimen>
+    <dimen name="audio_control_padding_right">5dp</dimen>
+    <dimen name="audio_name_text_size">18sp</dimen>
+    <dimen name="audio_singer_text_size">12sp</dimen>
+    <dimen name="audio_time_text_size">12sp</dimen>
+
+    <dimen name="audio_time_margin_top">2dp</dimen>
+    <dimen name="audio_seek_bar_padding">8dp</dimen>
+    <dimen name="audio_play_button_margin">16dp</dimen>
+
+    <dimen name="audio_id_icon_margin">5dp</dimen>
+    <dimen name="audio_id_icon_width">36dp</dimen>
+    <dimen name="audio_id_icon_height">36dp</dimen>
+    <dimen name="audio_id_text_size">18sp</dimen>
+
+    <!-- 我们知道距离左边是多少 audio_id_icon_margin*2 + audio_id_icon_width-->
+    <dimen name="audio_item_margin_left">50dp</dimen>
+    <dimen name="audio_item_margin_right">6dp</dimen>
+    <dimen name="audio_item_margin">3dp</dimen>
+    <dimen name="audio_item_name_text_size">20sp</dimen>
+    <dimen name="audio_item_text_size">14sp</dimen>
+
+    <!-- 控制面板，时间，歌手的边距-->
+    <dimen name="audio_control_margin">5dp</dimen>
+
+</resources>

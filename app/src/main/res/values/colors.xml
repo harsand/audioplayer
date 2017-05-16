@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="player_tag_text_color">#1c1b1b</color>
+
+    <color name="audio_name_text_color">#151617</color>
+    <color name="audio_singer_text_color">#44454b</color>
+    <color name="audio_time_text_color">#444b44</color>
+
+    <color name="audio_control_bg_color">#c3ecc3</color>
+    <color name="audio_id_text_color">#707170</color>
+    <color name="audio_item_name_text_color">#1d1e1d</color>
+    <color name="audio_item_text_color">#949d94</color>
+
+    <color name="item_split_bar_color">#78cb78</color>
+
+</resources>
