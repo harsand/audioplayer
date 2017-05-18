@@ -24,6 +24,7 @@ import com.hxiong.audioplayer.bean.AudioEntity;
 import com.hxiong.audioplayer.util.CommonUtils;
 import com.hxiong.audioplayer.util.Error;
 import com.hxiong.audioplayer.util.SharedPreferencesUtils;
+import com.hxiong.audioplayer.view.LyricsView;
 import com.hxiong.audioplayer.widget.PagerTagLayout;
 
 public class AudioPlayerActivity extends BaseActivity {
@@ -35,9 +36,7 @@ public class AudioPlayerActivity extends BaseActivity {
     protected  static final int MSG_PLAYER_NEXT= 5;
     protected  static final int MSG_PLAYER_PLAY = 6;
     protected  static final int MSG_SYNC_PLAYER = 7;
-    protected  static final int MSG_SYNC_PLAYER_TIME= 8;
-
-    protected  static final int PLAYER_SYNC_DELAY = 1000;
+    protected  static final int MSG_SYNC_LYRICS= 8;
 
     private AudioListManager mAudioListManager;
     private AudioPlayerManager mAudioPlayerManager;
@@ -51,6 +50,9 @@ public class AudioPlayerActivity extends BaseActivity {
     private ImageView mPreButton;
     private ImageView mNextButton;
     private ImageView mPlayButton;
+
+    //
+    private LyricsView mLyricsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +100,9 @@ public class AudioPlayerActivity extends BaseActivity {
         mAudioListManager=new AudioListManager(this,linearLayout);
         mAudioListManager.setOnPlayItemListener(mOnPlayItemListener);
 
+        //
+        mLyricsView=(LyricsView)audioLyrics.findViewById(R.id.audio_lyrics_view);
+
         //last we connect audioplayer service
         AudioPlayerManager.get().connect(this,mConnectionListener);
     }
@@ -130,17 +135,17 @@ public class AudioPlayerActivity extends BaseActivity {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+            mPlayingTime.setText(CommonUtils.getAudioTime(progress*1000));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+           // printLog("onStartTrackingTouch ");
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
+            setSeekPosition(seekBar.getProgress()*1000);
         }
     };
 
@@ -190,7 +195,7 @@ public class AudioPlayerActivity extends BaseActivity {
 
                      break;
                  case AudioPlayerManager.EVENT_TYPE_COMPLETION:
-                     mHandler.sendEmptyMessage(MSG_PLAYER_NEXT); //结束了，播放下一首
+                     mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
                      break;
                  case AudioPlayerManager.EVENT_TYPE_SEEK_COMPLETE:
 
@@ -201,8 +206,12 @@ public class AudioPlayerActivity extends BaseActivity {
                  case AudioPlayerManager.EVENT_TYPE_ERROR:
 
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_LYRICS:
-
+                 case AudioPlayerManager.EVENT_TYPE_SYNC:
+                     Message message=Message.obtain();
+                     message.what=MSG_SYNC_LYRICS;
+                     message.arg1=arg1;
+                     message.arg2=arg2;
+                     mHandler.sendMessage(message);  //必须在主线程中刷新
                      break;
                  default:  break;
              }
@@ -238,8 +247,8 @@ public class AudioPlayerActivity extends BaseActivity {
                 case MSG_SYNC_PLAYER:
                     handleSyncPlayer();
                     break;
-                case MSG_SYNC_PLAYER_TIME:
-                    handleSyncPlayerTime();
+                case MSG_SYNC_LYRICS:
+                    handleSyncTimeAndLyrics(msg.arg1,msg.arg2);
                     break;
                 default:   break;
             }
@@ -270,7 +279,6 @@ public class AudioPlayerActivity extends BaseActivity {
             if(mAudioPlayerManager.stop()!=Error.RETURN_OK){
                 printLog("handlePlayerStart stop fail.");
             }
-            mHandler.removeMessages(MSG_SYNC_PLAYER_TIME);  //remove msg
         }
         //
         if (mAudioPlayerManager.getPlayerState()==AudioPlayerManager.PLAYER_STATE_IDLE){
@@ -282,7 +290,9 @@ public class AudioPlayerActivity extends BaseActivity {
             }else{
                 setPlayerImageState(true);
                 setDurationInfo();
-                mHandler.sendEmptyMessage(MSG_SYNC_PLAYER_TIME);
+                //播放了下一首，显示歌词
+                String lyrics=mAudioPlayerManager.getLyrics();
+                mLyricsView.setLyricsText(lyrics);
             }
         }
     }
@@ -303,7 +313,6 @@ public class AudioPlayerActivity extends BaseActivity {
                 printLog("handlePlayerPlay start fail.");
             }else{
                 setPlayerImageState(true);
-                mHandler.sendEmptyMessage(MSG_SYNC_PLAYER_TIME);
             }
         }else if(playerState==AudioPlayerManager.PLAYER_STATE_START){
             mHandler.sendEmptyMessage(MSG_PLAYER_PAUSE);
@@ -319,8 +328,19 @@ public class AudioPlayerActivity extends BaseActivity {
             printLog("handlePlayerStart start fail.");
         }else{
             setPlayerImageState(false);
-            mHandler.removeMessages(MSG_SYNC_PLAYER_TIME);  //remove msg
         }
+    }
+
+    private void setSeekPosition(int position){
+        if(mAudioPlayerManager==null){
+            printLog("setSeekPosition mAudioPlayerManager is not init.");
+            return;
+        }
+
+        if(mAudioPlayerManager.seekTo(position)!=Error.RETURN_OK){
+             printLog("setSeekPosition seekTo fail.");
+        }
+
     }
 
     private void handleSyncPlayer(){
@@ -334,6 +354,9 @@ public class AudioPlayerActivity extends BaseActivity {
              if(audioEntity!=null){
                  setPlayerControlInfo(audioEntity);
                  mAudioListManager.setSelectItem(playId);
+                 // 同步歌词
+                 String lyrics=mAudioPlayerManager.getLyrics();
+                 mLyricsView.setLyricsText(lyrics);
                  int playerState=mAudioPlayerManager.getPlayerState();
                  if(playerState==AudioPlayerManager.PLAYER_STATE_PAUSE){
                      setPlayerImageState(false);
@@ -341,22 +364,17 @@ public class AudioPlayerActivity extends BaseActivity {
                  }else if(playerState==AudioPlayerManager.PLAYER_STATE_START){
                      setPlayerImageState(true);
                      setDurationInfo();
-                     mHandler.sendEmptyMessage(MSG_SYNC_PLAYER_TIME);
                  }
              }
          }
     }
 
-    private void handleSyncPlayerTime(){
-        if(mAudioPlayerManager==null){
-            printLog("handleSyncPlayerTime mAudioPlayerManager is not init.");
-            return;
-        }
-        int position=mAudioPlayerManager.getCurrentPosition();
+    private void handleSyncTimeAndLyrics(int position,int lyricIndex){
         mPlayingTime.setText(CommonUtils.getAudioTime(position));
         position/=1000;
         mSeekBar.setProgress(position);
-        mHandler.sendEmptyMessageDelayed(MSG_SYNC_PLAYER_TIME,PLAYER_SYNC_DELAY); //get position next 1 sec
+        //歌词
+        mLyricsView.setSelectedIndex(lyricIndex);
     }
 
     private void setDurationInfo(){
@@ -406,7 +424,6 @@ public class AudioPlayerActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mHandler.sendEmptyMessage(MSG_SYNC_PLAYER_TIME); //
         if(mAudioPlayerManager!=null)
             mAudioPlayerManager.disconnect();
     }

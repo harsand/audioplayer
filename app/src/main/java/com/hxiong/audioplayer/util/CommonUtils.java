@@ -2,7 +2,8 @@ package com.hxiong.audioplayer.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created by hxiong on 2017/5/9 23:13.
@@ -15,6 +16,8 @@ public class CommonUtils {
     public static final int DURATION_INVALID = -1;
 
     public static final String LYRIC_SUFFIX =".lrc";
+    //编码格式，可能会存在乱码哦
+    public static final String LYRIC_CHARSET ="GBK";
 
     private CommonUtils(){   }
 
@@ -44,11 +47,11 @@ public class CommonUtils {
         File file=new File(path);
         LyricsList lyricsList=null;
         if(file.exists()&&file.isFile()){
-            FileReader fileReader=null;
+            InputStreamReader inReader=null;
             lyricsList=new LyricsList();
             try {
-                fileReader= new FileReader(file);
-                BufferedReader bufferedReader=new BufferedReader(fileReader);
+                inReader = new InputStreamReader(new FileInputStream(file), LYRIC_CHARSET);
+                BufferedReader bufferedReader=new BufferedReader(inReader);
                 String str;
                 while ((str=bufferedReader.readLine())!=null){
                     readOneLyric(lyricsList,str);
@@ -56,7 +59,7 @@ public class CommonUtils {
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
-                closeFileReader(fileReader);
+                closeFileReader(inReader);
             }
         }
         return lyricsList;
@@ -95,9 +98,9 @@ public class CommonUtils {
         return DURATION_INVALID;
     }
 
-    public static void closeFileReader(FileReader fileReader){
+    public static void closeFileReader(InputStreamReader inReader){
         try {
-            if(fileReader!=null) fileReader.close();
+            if(inReader!=null) inReader.close();
         }catch (Exception e){
             e.printStackTrace();
         }

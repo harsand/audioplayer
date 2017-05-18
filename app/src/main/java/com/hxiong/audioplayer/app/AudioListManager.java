@@ -6,7 +6,6 @@ import android.widget.LinearLayout;
 
 import com.hxiong.audioplayer.R;
 import com.hxiong.audioplayer.bean.AudioEntity;
-import com.hxiong.audioplayer.util.SharedPreferencesUtils;
 import com.hxiong.audioplayer.util.SpreadLock;
 import com.hxiong.audioplayer.widget.SpreadLayout;
 import com.hxiong.audioplayer.widget.SpreadLayout.OnSpreadListener;
@@ -54,22 +53,34 @@ public class AudioListManager implements OnSpreadListener {
     }
 
     public AudioEntity getAudioEntity(int index){
+         if(index>=mSpreadLayouts.size()){
+             return null;
+         }
          SpreadLayout spreadLayout=mSpreadLayouts.get(index);
          return spreadLayout==null?null:spreadLayout.getAudioEntity();
     }
 
     public void setSelectItem(int playId){
+        setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_NORMAL);//取消上一次选择
         mSelectItem=playId;
+        setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_SELECT);//设置为选择状态
     }
 
     public void setItemState(boolean isPlay){
         SpreadLayout spreadLayout=mSpreadLayouts.get(mSelectItem);
         if(spreadLayout!=null){
             if(isPlay){
-                spreadLayout.setSelectedState(SpreadLayout.ITEM_STATE_PLAY);
+                spreadLayout.setSelectedState(SpreadLayout.ITEM_STATE_PLAY);//设置为播放状态
             }else{
-                spreadLayout.setSelectedState(SpreadLayout.ITEM_STATE_PAUSE);
+                spreadLayout.setSelectedState(SpreadLayout.ITEM_STATE_PAUSE);//设置为暂停状态
             }
+        }
+    }
+
+    private void setSelectItemState(int selectedId,int state){
+        if(selectedId!=-1){
+            SpreadLayout spreadLayout=mSpreadLayouts.get(selectedId);
+            if(spreadLayout!=null) spreadLayout.setSelectedState(state);
         }
     }
 
@@ -113,13 +124,9 @@ public class AudioListManager implements OnSpreadListener {
 //            if(mSelectItem==position){
 //                return ;
 //            }
-        if(mSelectItem!=-1){
-            SpreadLayout spreadLayout=mSpreadLayouts.get(mSelectItem);
-            if(spreadLayout!=null) spreadLayout.setSelectedState(SpreadLayout.ITEM_STATE_NORMAL);
-        }
+        setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_NORMAL);
         mSelectItem=selectedItem;
         mSpreadLayouts.get(mSelectItem).setSelectedState(SpreadLayout.ITEM_STATE_PLAY);
-        SharedPreferencesUtils.get().setLastPlayItem(mSelectItem);
         if(mOnPlayItemListener!=null){
             mOnPlayItemListener.onItemClicked(mSelectItem,audioEntity);
         }

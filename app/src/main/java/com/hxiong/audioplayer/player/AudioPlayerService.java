@@ -161,7 +161,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     }
 
     int seekTo(int msec){
-        return 0;
+        return mAudioPlayer.seekTo(msec);
     }
 
     String getLyrics(){
@@ -205,7 +205,32 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
     @Override
     public void onNotifyListener(int event, String arg0, int arg1, int arg2) {
-         notifyListener(event, arg0, arg1, arg2);
+         switch (event){
+             case AudioPlayer.EVENT_TYPE_COMPLETION:
+                 if(doComletion()){
+                     notifyListener(event, arg0, arg1, arg2);
+                 }else{
+                     notifyListener(AudioPlayer.EVENT_TYPE_ERROR, "error", arg1, arg2);  //发生了错误
+                 }
+                 break;
+             default:
+                 notifyListener(event, arg0, arg1, arg2);
+                 break;
+         }
+    }
+
+    private boolean doComletion(){   //顺序（或者随机）播放下一首哥
+        if(mAudioPlayer.stop()!=Error.RETURN_OK){   //先reset
+            printLog("doComletion stop fail.");
+        }
+        int nextPlayId=mAudioEntityManager.getNextPlayId();
+        if(setDataSource(nextPlayId)!=Error.RETURN_OK){   //设置播放资源
+            printLog("doComletion setDataSource fail.");
+        }
+        if(mAudioPlayer.start()!=Error.RETURN_OK){   //开始播放
+            printLog("doComletion start fail.");
+        }
+        return true;
     }
 
     /**

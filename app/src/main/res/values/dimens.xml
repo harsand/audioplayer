@@ -30,4 +30,7 @@
     <!-- 控制面板，时间，歌手的边距-->
     <dimen name="audio_control_margin">5dp</dimen>
 
+    <!-- 歌词显示控件的边距-->
+    <dimen name="lyrics_view_margin">10dp</dimen>
+
 </resources>

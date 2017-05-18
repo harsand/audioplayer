@@ -2,5 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
+        <com.hxiong.audioplayer.view.LyricsView
+            android:id="@+id/audio_lyrics_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/lyrics_view_margin"
+            />
 </RelativeLayout>

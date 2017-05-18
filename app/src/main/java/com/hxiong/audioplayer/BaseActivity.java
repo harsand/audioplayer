@@ -23,7 +23,7 @@ public class BaseActivity extends Activity {
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(R.anim.left_enter, R.anim.right_exit);
+        //overridePendingTransition(R.anim.left_enter, R.anim.right_exit);
     }
 
     protected void printLog(String log){

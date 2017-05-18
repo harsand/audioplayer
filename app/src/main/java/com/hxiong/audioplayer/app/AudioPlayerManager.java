@@ -44,7 +44,7 @@ public class AudioPlayerManager {
     public static final int EVENT_TYPE_SEEK_COMPLETE = 2;
     public static final int EVENT_TYPE_INFO = 3;
     public static final int EVENT_TYPE_ERROR = 4;
-    public static final int EVENT_TYPE_LYRICS = 5;
+    public static final int EVENT_TYPE_SYNC = 5;
 
     private static AudioPlayerManager mAudioPlayerManager=new AudioPlayerManager();
     private IAudioPlayer mAudioPlayer;
@@ -189,6 +189,17 @@ public class AudioPlayerManager {
         return Error.RETURN_ERROR;
     }
 
+    public int seekTo(int position){
+        if(isServiceAlive()){
+            try {
+                return mAudioPlayer.seekTo(position);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return Error.RETURN_ERROR;
+    }
+
     public int getDuration(){
         if(isServiceAlive()){
             try {
@@ -211,6 +222,16 @@ public class AudioPlayerManager {
         return Error.RETURN_ERROR;
     }
 
+    public String getLyrics(){
+        if(isServiceAlive()){
+            try {
+                return mAudioPlayer.getLyrics();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     private boolean isServiceAlive(){
         if(mAudioPlayer==null){

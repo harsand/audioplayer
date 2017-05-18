@@ -31,13 +31,13 @@ public class AudioPlayer {
       public static final int EVENT_TYPE_SEEK_COMPLETE = 2;
       public static final int EVENT_TYPE_INFO = 3;
       public static final int EVENT_TYPE_ERROR = 4;
-      public static final int EVENT_TYPE_LYRICS = 5;
+      public static final int EVENT_TYPE_SYNC = 5;
 
       //AudioPlayerHandler msg
       public static final int MSG_INIT_LYRICS = 0;
       public static final int MSG_PULL_LYRICS = 1;
 
-      protected  static final int PLAYER_PULL_DELAY = 1000;
+      protected  static final int PLAYER_PULL_DELAY = 800;  //
 
       private MediaPlayer mMediaPlayer;
       private AudioPlayerListener mPlayerListener;
@@ -59,6 +59,7 @@ public class AudioPlayer {
           mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
               @Override
               public void onCompletion(MediaPlayer mp) {
+                  stopPullLyrics();  //停止时间
                   onNotifyListener(EVENT_TYPE_COMPLETION,"onCompletion",0,0);
               }
           });
@@ -85,6 +86,7 @@ public class AudioPlayer {
           //
           lyricsLock=new Object();
           mHandlerThread=new HandlerThread("AudioPlayer");
+          mHandlerThread.start();  //must call
           mHandler=new AudioPlayerHandler(mHandlerThread.getLooper());
       }
 
@@ -188,6 +190,20 @@ public class AudioPlayer {
           return Error.RETURN_ERROR;
       }
 
+      public synchronized int seekTo(int msec){
+          if(mState==PLAYER_STATE_START){
+              try {
+                  mMediaPlayer.seekTo(msec);
+                  //stopPullLyrics();
+                  //mState=PLAYER_STATE_PAUSE;
+                  return Error.RETURN_OK;
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+          }
+          return Error.RETURN_ERROR;
+      }
+
       public void release(){    // never call
         try {
             mHandlerThread.quit(); // importance
@@ -231,10 +247,14 @@ public class AudioPlayer {
 
       private void pullLyrics(){
           synchronized (lyricsLock) {
-              if (lyrics == null) return;   //no lyrics
               int curPosition = getCurrentPosition();
-
-              onNotifyListener(EVENT_TYPE_LYRICS, "pullLyrics", curPosition, 0);
+              String lyric="pullLyrics";
+              int lyricIndex=-1;
+              if(lyrics!=null&&lyrics.findHitLyric(curPosition)){
+                  lyricIndex=lyrics.getHitIndex();
+                  lyric=lyrics.getHitLyric();
+              }
+              onNotifyListener(EVENT_TYPE_SYNC, lyric, curPosition, lyricIndex);
               mHandler.sendEmptyMessageDelayed(MSG_PULL_LYRICS, PLAYER_PULL_DELAY);  //after one second
           }
       }

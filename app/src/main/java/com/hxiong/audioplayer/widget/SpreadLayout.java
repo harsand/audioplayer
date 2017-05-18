@@ -26,6 +26,7 @@ public class SpreadLayout extends RelativeLayout {
     public  static final int ITEM_STATE_PLAY= 0;
     public  static final int ITEM_STATE_PAUSE = 1;
     public  static final int ITEM_STATE_NORMAL = 2;
+    public  static final int ITEM_STATE_SELECT = 3;
 
     protected  static final int REFRESH_DELAY = 8;
     protected  static final int REFRESH_COUNT = 50;
@@ -128,22 +129,30 @@ public class SpreadLayout extends RelativeLayout {
         switch (state){
             case ITEM_STATE_PLAY:
                 mAudioState.setImageResource(R.mipmap.audio_state_play);
-                seStateVisible(true);
+                isSelected=true;
+                seImageVisible(true);
                 break;
             case ITEM_STATE_PAUSE:
                 mAudioState.setImageResource(R.mipmap.audio_state_stop);
-                seStateVisible(true);
+                isSelected=true;
+                seImageVisible(true);
+                break;
+            case ITEM_STATE_NORMAL:
+                isSelected=false;
+                seImageVisible(false);
+            case ITEM_STATE_SELECT:
+                isSelected=true;   //just select
+                seImageVisible(false);
                 break;
             default:     //default is normal
-                seStateVisible(false);
+                seImageVisible(false);
                 break;
         }
     }
 
-    private void seStateVisible(boolean isVisible){
+    private void seImageVisible(boolean isVisible){
         mAudioState.setVisibility(isVisible?VISIBLE:INVISIBLE);
         mAudioId.setVisibility(isVisible?INVISIBLE:VISIBLE);
-        isSelected=isVisible;
         invalidate();  //刷新一下哦
     }
 

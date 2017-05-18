@@ -72,10 +72,32 @@ public class AudioEntityManager {
         }
     }
 
+    public int getNextPlayId(){
+        synchronized (mLock){
+            ArrayList<AudioEntity> list = mAudioListMap.get(curAudioListName);
+            if (list != null) {
+                return calculateOrder(list.size(),0);
+            }
+            return curPlayId;  //return current play item
+        }
+    }
+
+    /**
+     * 获取下一首个的方式，目前是顺序
+     * @param size  列表的大小
+     * @param type 获取的方式
+     * @return
+     */
+    private int calculateOrder(int size,int type){
+        int order=curPlayId+1;
+        order=order>size?0:order;
+        return order;
+    }
+
     public String getAudioEntityPath(int index){
         synchronized (mLock) {
             ArrayList<AudioEntity> list = mAudioListMap.get(curAudioListName);
-            if (list != null) {
+            if (list != null&&index<list.size()) {
                 AudioEntity audioEntity = list.get(index);
                 return audioEntity==null?null:audioEntity.path;
             }
@@ -96,23 +118,6 @@ public class AudioEntityManager {
 
     private ArrayList<AudioEntity> getDefaultAudioList(){
         ArrayList<AudioEntity> audioList=new ArrayList<AudioEntity>();
-//        AudioEntity entity=new AudioEntity();
-//        entity.name="test.mp3";
-//        entity.title="test";
-//        entity.artist="hxiong";
-//        entity.duration=123*1000;
-//        audioList.add(entity);
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
-//        audioList.add(new AudioEntity());
         Cursor cursor = null;
         try{
             cursor = mContext.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
