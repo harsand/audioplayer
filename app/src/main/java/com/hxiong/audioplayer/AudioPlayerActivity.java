@@ -37,6 +37,8 @@ public class AudioPlayerActivity extends BaseActivity {
     protected  static final int MSG_PLAYER_PLAY = 6;
     protected  static final int MSG_SYNC_PLAYER = 7;
     protected  static final int MSG_SYNC_LYRICS= 8;
+    protected  static final int MSG_SYNC_STATE= 9;
+
 
     private AudioListManager mAudioListManager;
     private AudioPlayerManager mAudioPlayerManager;
@@ -192,10 +194,10 @@ public class AudioPlayerActivity extends BaseActivity {
         public void onNotify(int event, String arg0, int arg1, int arg2) {
              switch (event){
                  case AudioPlayerManager.EVENT_TYPE_PREPARE:
-
+                     mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
                      break;
                  case AudioPlayerManager.EVENT_TYPE_COMPLETION:
-                     mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
+                     //mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
                      break;
                  case AudioPlayerManager.EVENT_TYPE_SEEK_COMPLETE:
 
@@ -212,6 +214,12 @@ public class AudioPlayerActivity extends BaseActivity {
                      message.arg1=arg1;
                      message.arg2=arg2;
                      mHandler.sendMessage(message);  //必须在主线程中刷新
+                     break;
+                 case AudioPlayerManager.EVENT_TYPE_STATE:
+                     Message msgState=Message.obtain();
+                     msgState.what=MSG_SYNC_STATE;
+                     msgState.arg1=arg1;   //是播放还是暂停状态
+                     mHandler.sendMessage(msgState);  //必须在主线程中刷新
                      break;
                  default:  break;
              }
@@ -250,6 +258,9 @@ public class AudioPlayerActivity extends BaseActivity {
                 case MSG_SYNC_LYRICS:
                     handleSyncTimeAndLyrics(msg.arg1,msg.arg2);
                     break;
+                case MSG_SYNC_STATE:
+                    handleSyncState(msg.arg1);
+                    break;
                 default:   break;
             }
             super.handleMessage(msg);
@@ -287,12 +298,6 @@ public class AudioPlayerActivity extends BaseActivity {
             }
             if(mAudioPlayerManager.start()!=Error.RETURN_OK){
                 printLog("handlePlayerStart start fail.");
-            }else{
-                setPlayerImageState(true);
-                setDurationInfo();
-                //播放了下一首，显示歌词
-                String lyrics=mAudioPlayerManager.getLyrics();
-                mLyricsView.setLyricsText(lyrics);
             }
         }
     }
@@ -311,8 +316,6 @@ public class AudioPlayerActivity extends BaseActivity {
         }else if(playerState==AudioPlayerManager.PLAYER_STATE_PAUSE){
             if(mAudioPlayerManager.start()!=Error.RETURN_OK){
                 printLog("handlePlayerPlay start fail.");
-            }else{
-                setPlayerImageState(true);
             }
         }else if(playerState==AudioPlayerManager.PLAYER_STATE_START){
             mHandler.sendEmptyMessage(MSG_PLAYER_PAUSE);
@@ -326,8 +329,6 @@ public class AudioPlayerActivity extends BaseActivity {
         }
         if(mAudioPlayerManager.pause()!=Error.RETURN_OK){
             printLog("handlePlayerStart start fail.");
-        }else{
-            setPlayerImageState(false);
         }
     }
 
@@ -375,6 +376,18 @@ public class AudioPlayerActivity extends BaseActivity {
         mSeekBar.setProgress(position);
         //歌词
         mLyricsView.setSelectedIndex(lyricIndex);
+    }
+
+    /**
+     * 播放，暂停时，同步状态
+     * @param state
+     */
+    private void handleSyncState(int state){
+        if(state==AudioPlayerManager.PLAYER_STATE_PAUSE){
+            setPlayerImageState(false);
+        }else if(state==AudioPlayerManager.PLAYER_STATE_START){
+            setPlayerImageState(true);
+        }
     }
 
     private void setDurationInfo(){

@@ -140,6 +140,7 @@ public class SpreadLayout extends RelativeLayout {
             case ITEM_STATE_NORMAL:
                 isSelected=false;
                 seImageVisible(false);
+                break;
             case ITEM_STATE_SELECT:
                 isSelected=true;   //just select
                 seImageVisible(false);

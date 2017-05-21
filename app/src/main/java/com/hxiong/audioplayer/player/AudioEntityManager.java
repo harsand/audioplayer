@@ -116,6 +116,17 @@ public class AudioEntityManager {
         }
     }
 
+    /**
+     * 当前正在播放的歌曲信息
+     * @return
+     */
+    public AudioEntity getCurAudioEntity(){
+        synchronized (mLock) {
+            ArrayList<AudioEntity> list = mAudioListMap.get(curAudioListName);
+            return (list == null|| curPlayId>=list.size()) ? null : list.get(curPlayId);
+        }
+    }
+
     private ArrayList<AudioEntity> getDefaultAudioList(){
         ArrayList<AudioEntity> audioList=new ArrayList<AudioEntity>();
         Cursor cursor = null;

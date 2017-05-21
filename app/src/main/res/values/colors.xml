@@ -14,4 +14,11 @@
 
     <color name="item_split_bar_color">#78cb78</color>
 
+    <!-- 通知栏控制-->
+    <color name="notify_audio_title_color">#232623</color>
+    <color name="notify_audio_singer_color">#646b64</color>
+    <color name="notify_btn_lyric_color">#b6bcb6</color>
+    <color name="notify_btn_normal_color">#0078cb78</color>
+    <color name="notify_btn_press_color">#78cb78</color>
+
 </resources>

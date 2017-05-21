@@ -45,6 +45,7 @@ public class AudioPlayerManager {
     public static final int EVENT_TYPE_INFO = 3;
     public static final int EVENT_TYPE_ERROR = 4;
     public static final int EVENT_TYPE_SYNC = 5;
+    public static final int EVENT_TYPE_STATE = 6;
 
     private static AudioPlayerManager mAudioPlayerManager=new AudioPlayerManager();
     private IAudioPlayer mAudioPlayer;
@@ -88,6 +89,7 @@ public class AudioPlayerManager {
      */
     public void disconnect(){
          if(isBindService){
+             removePlayerListener();  //remove listener
              if(mContext!=null) mContext.unbindService(mServiceConnection);
          }
         //if(mConnectionListener!=null) mConnectionListener.onDisconnected();
@@ -231,6 +233,16 @@ public class AudioPlayerManager {
             }
         }
         return null;
+    }
+
+    private void removePlayerListener(){
+        if(isServiceAlive()){
+            try {
+                mAudioPlayer.removeListener(mPlayerListener);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean isServiceAlive(){

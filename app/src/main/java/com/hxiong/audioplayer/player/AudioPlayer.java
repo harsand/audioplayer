@@ -32,12 +32,13 @@ public class AudioPlayer {
       public static final int EVENT_TYPE_INFO = 3;
       public static final int EVENT_TYPE_ERROR = 4;
       public static final int EVENT_TYPE_SYNC = 5;
+      public static final int EVENT_TYPE_STATE = 6;
 
       //AudioPlayerHandler msg
       public static final int MSG_INIT_LYRICS = 0;
       public static final int MSG_PULL_LYRICS = 1;
 
-      protected  static final int PLAYER_PULL_DELAY = 800;  //
+      protected  static final int PLAYER_PULL_DELAY = 500;  //
 
       private MediaPlayer mMediaPlayer;
       private AudioPlayerListener mPlayerListener;
@@ -239,10 +240,12 @@ public class AudioPlayer {
 
       private void startPullLyrics(){
           mHandler.sendEmptyMessage(MSG_PULL_LYRICS);
+          onNotifyListener(EVENT_TYPE_STATE,"start",PLAYER_STATE_START,0);
       }
 
       private void stopPullLyrics(){
           mHandler.removeMessages(MSG_PULL_LYRICS);
+          onNotifyListener(EVENT_TYPE_STATE,"pause",PLAYER_STATE_PAUSE,0);
       }
 
       private void pullLyrics(){

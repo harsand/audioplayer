@@ -63,7 +63,7 @@ public class AudioListManager implements OnSpreadListener {
     public void setSelectItem(int playId){
         setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_NORMAL);//取消上一次选择
         mSelectItem=playId;
-        setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_SELECT);//设置为选择状态
+        setSelectItemState(playId,SpreadLayout.ITEM_STATE_SELECT);//设置为选择状态
     }
 
     public void setItemState(boolean isPlay){

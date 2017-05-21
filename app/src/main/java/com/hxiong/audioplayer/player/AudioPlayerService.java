@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * Email 2509477698@qq.com
  */
 
-public class AudioPlayerService extends Service implements AudioPlayer.AudioPlayerListener{
+public class AudioPlayerService extends Service implements AudioPlayer.AudioPlayerListener,ScreenManager.ScreenListener{
 
     private static final String TAG="AudioPlayerService";
     private static final boolean ENABLE_LOG=true;
@@ -29,6 +29,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     private ArrayList<IAudioPlayerListener> mListener;
     private AudioEntityManager mAudioEntityManager;
     private AudioPlayer mAudioPlayer;
+    private ScreenManager mScreenManager;
 
     @Override
     public void onCreate() {
@@ -37,9 +38,14 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         mListener=new ArrayList<IAudioPlayerListener>();
         mAudioEntityManager=new AudioEntityManager(getBaseContext());
         mAudioPlayer = new AudioPlayer();
+        mScreenManager=new ScreenManager(getBaseContext());
         mAudioEntityManager.init();
         mAudioPlayer.setAudioPlayerListener(this);
         mAudioPlayer.init();
+        mScreenManager.setScreenListener(this);
+        mScreenManager.init();
+        //通知栏显示
+        mScreenManager.updateAudioInfo(mAudioEntityManager.getCurAudioEntity());
     }
 
     @Override
@@ -63,6 +69,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         mBinder.release();
         mListener.clear();
         mAudioPlayer.release();
+        mScreenManager.destroy();
         printLog("AudioPlayerService had destroy.");
     }
 
@@ -206,6 +213,10 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     @Override
     public void onNotifyListener(int event, String arg0, int arg1, int arg2) {
          switch (event){
+             case AudioPlayer.EVENT_TYPE_PREPARE:
+                 mScreenManager.updateAudioInfo(mAudioEntityManager.getCurAudioEntity());
+                 notifyListener(event, arg0, arg1, arg2);
+                 break;
              case AudioPlayer.EVENT_TYPE_COMPLETION:
                  if(doComletion()){
                      notifyListener(event, arg0, arg1, arg2);
@@ -213,24 +224,75 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                      notifyListener(AudioPlayer.EVENT_TYPE_ERROR, "error", arg1, arg2);  //发生了错误
                  }
                  break;
+             case AudioPlayer.EVENT_TYPE_STATE:
+                 mScreenManager.updatePlayState(arg1);
+                 notifyListener(event, arg0, arg1, arg2);
+                 break;
              default:
                  notifyListener(event, arg0, arg1, arg2);
                  break;
          }
     }
 
-    private boolean doComletion(){   //顺序（或者随机）播放下一首哥
-        if(mAudioPlayer.stop()!=Error.RETURN_OK){   //先reset
-            printLog("doComletion stop fail.");
-        }
+    private boolean doComletion(){
+        return playNextAudio(0);
+    }
+
+    /**
+     *
+     * @param order
+     * @return
+     */
+    private boolean playNextAudio(int order){ //顺序（或者随机）播放下一首歌
         int nextPlayId=mAudioEntityManager.getNextPlayId();
-        if(setDataSource(nextPlayId)!=Error.RETURN_OK){   //设置播放资源
-            printLog("doComletion setDataSource fail.");
+        return playAudio(nextPlayId);
+    }
+
+    private boolean playAudio(int playId){
+        int state=mAudioPlayer.getPlayerState();
+        if(state!=AudioPlayer.PLAYER_STATE_IDLE&&mAudioPlayer.stop()!=Error.RETURN_OK){   //先reset
+            printLog("playAudio stop fail.");
+        }
+
+        if(setDataSource(playId)!=Error.RETURN_OK){   //设置播放资源
+            printLog("playAudio setDataSource fail.");
         }
         if(mAudioPlayer.start()!=Error.RETURN_OK){   //开始播放
-            printLog("doComletion start fail.");
+            printLog("playAudio start fail.");
         }
         return true;
+    }
+
+    @Override
+    public void onScreenNotify(int event, String arg0, int arg1) {
+         switch (event){
+             case ScreenManager.INTENT_EXTRA_PLAY_ID:
+                 doPlay();
+                 break;
+             case ScreenManager.INTENT_EXTRA_NEXT_ID:
+                 playNextAudio(0);
+                 break;
+             case ScreenManager.INTENT_EXTRA_LYRIC_ID:
+
+                 break;
+             default: break;
+         }
+    }
+
+    private void doPlay(){
+        int playerState=mAudioPlayer.getPlayerState();
+        if(playerState==AudioPlayer.PLAYER_STATE_IDLE){
+            int playId=mAudioEntityManager.getCurPlayId();
+            playAudio(playId);
+        }else if(playerState==AudioPlayer.PLAYER_STATE_PAUSE){
+            if(mAudioPlayer.start()!=Error.RETURN_OK){
+                printLog("doPlay start fail.");
+            }
+        }else if(playerState==AudioPlayer.PLAYER_STATE_START){
+            if(mAudioPlayer.pause()!=Error.RETURN_OK){
+                printLog("doPlay pause fail.");
+            }
+        }
     }
 
     /**
