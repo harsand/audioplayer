@@ -437,7 +437,8 @@ public class AudioPlayerActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mAudioPlayerManager!=null)
+        if(mAudioPlayerManager!=null) {
             mAudioPlayerManager.disconnect();
+        }
     }
 }

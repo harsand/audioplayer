@@ -66,10 +66,14 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mBinder.release();
-        mListener.clear();
-        mAudioPlayer.release();
-        mScreenManager.destroy();
+        try {
+            mBinder.release();
+            mListener.clear();
+            mAudioPlayer.release();
+            mScreenManager.destroy();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         printLog("AudioPlayerService had destroy.");
     }
 
@@ -80,6 +84,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     boolean addListener(final IAudioPlayerListener listener){
        if (mListener.contains(listener)) {
            printLog("listener has already added.");
+           mScreenManager.notifyAppState(true);
            return false;
        }
        try {
@@ -88,17 +93,25 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                public void binderDied() {
                    //// FIXME: 2017/5/13
                    mListener.remove(listener);
+                   if(mListener.isEmpty()){
+                       mScreenManager.notifyAppState(false);
+                   }
                }
            },0);
        } catch (RemoteException e) {
            e.printStackTrace();
        }
        mListener.add(listener);
-        return true;
+       mScreenManager.notifyAppState(true);
+       return true;
     }
 
     boolean removeListener(IAudioPlayerListener listener){
-        return mListener.remove(listener);
+        boolean ret=mListener.remove(listener);
+        if(mListener.isEmpty()){
+            mScreenManager.notifyAppState(false);
+        }
+        return ret;
     }
 
     int getPlayerState(){
@@ -275,6 +288,12 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
              case ScreenManager.INTENT_EXTRA_LYRIC_ID:
 
                  break;
+             case ScreenManager.INTENT_EXTRA_CLICKED_ID:
+
+                 break;
+             case ScreenManager.INTENT_EXTRA_DELETED_ID:
+                 stopSelf();  //停止service
+                 break;
              default: break;
          }
     }
@@ -317,7 +336,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
         @Override
         public boolean removeListener(IAudioPlayerListener listener) throws RemoteException {
-            return mService!=null?false:mService.removeListener(listener);
+            return mService==null?false:mService.removeListener(listener);
         }
 
         @Override

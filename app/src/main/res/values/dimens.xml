@@ -36,7 +36,7 @@
     <!-- 通知栏控制-->
     <dimen name="audio_notify_padding">3dp</dimen>
     <dimen name="audio_notify_margin">3dp</dimen>
-    <dimen name="notify_lyric_text_size">20sp</dimen>
+    <dimen name="notify_lyric_text_size">22sp</dimen>
     <dimen name="notify_title_text_size">18sp</dimen>
     <dimen name="notify_singer_text_size">12sp</dimen>
 
