@@ -50,6 +50,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
     @Override
     public int onStartCommand(Intent intent,  int flags, int startId) {
+        printLog("AudioPlayerService onStartCommand had call.");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -292,6 +293,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
                  break;
              case ScreenManager.INTENT_EXTRA_DELETED_ID:
+                 printLog("AudioPlayerService stopSelf().");
                  stopSelf();  //停止service
                  break;
              default: break;

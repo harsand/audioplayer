@@ -55,12 +55,10 @@ public class AudioPlayerManager {
     private Context mContext;
     private ConnectionListener mConnectionListener;
 
-    private boolean isStartService;
     private boolean isBindService;
 
      //not allow
      private AudioPlayerManager(){
-         isStartService=false;
          isBindService=false;
      }
 
@@ -77,6 +75,7 @@ public class AudioPlayerManager {
             printLog("context or listener is null.");
             return false;
         }
+        //确保service 是先被start，然后再bind
          if(!startPlayerService(context)){
              printLog("startPlayerService fail.");
              return false;
@@ -284,6 +283,7 @@ public class AudioPlayerManager {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            printLog("onServiceDisconnected had call.");
             // need or no need
             if(mConnectionListener!=null) mConnectionListener.onDisconnected();
             isBindService=false;
@@ -295,13 +295,9 @@ public class AudioPlayerManager {
    ;
     private boolean startPlayerService(Context context){
         try {
-            if (isStartService) {
-                printLog("AUDIO_PLAYER_SERVICE had start.");
-                return true;
-            }
             Intent intent = new Intent(AUDIO_PLAYER_SERVICE);
             intent.setPackage(context.getPackageName());   //need after L
-            return isStartService = context.startService(intent) != null;
+            return  context.startService(intent) != null;
         }catch (Exception e){
             e.printStackTrace();
         }

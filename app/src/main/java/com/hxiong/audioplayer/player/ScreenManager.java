@@ -136,7 +136,10 @@ public class ScreenManager {
      public void notifyAppState(boolean isAlive){
          isCanClear=!isAlive;
          if(isCanClear&&!isPlay){
-             mNotification.flags=Notification.FLAG_AUTO_CANCEL;
+             mNotification.flags = Notification.FLAG_AUTO_CANCEL;
+             mNotificationManager.notify(SCREEN_NOTIFICATION_ID,mNotification);
+         }else{
+             mNotification.flags=Notification.FLAG_ONGOING_EVENT;
              mNotificationManager.notify(SCREEN_NOTIFICATION_ID,mNotification);
          }
      }
