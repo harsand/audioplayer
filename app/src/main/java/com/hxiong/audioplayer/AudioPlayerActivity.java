@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -38,6 +40,11 @@ public class AudioPlayerActivity extends BaseActivity {
     protected  static final int MSG_SYNC_PLAYER = 7;
     protected  static final int MSG_SYNC_LYRICS= 8;
     protected  static final int MSG_SYNC_STATE= 9;
+    protected  static final int MSG_SET_ORDER= 10;
+
+    protected  static final int PLAY_ORDER_SINGLE = 0;
+    protected  static final int PLAY_ORDER_ORDER= 1;
+    protected  static final int PLAY_ORDER_RANDOM= 2;
 
 
     private AudioListManager mAudioListManager;
@@ -52,9 +59,13 @@ public class AudioPlayerActivity extends BaseActivity {
     private ImageView mPreButton;
     private ImageView mNextButton;
     private ImageView mPlayButton;
+    private LinearLayout mInfoLayout;
+    private ImageView mInfoControl;
+    private TextView mOrderControl;
 
     //
     private LyricsView mLyricsView;
+    private PopupMenu mPopupMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +73,8 @@ public class AudioPlayerActivity extends BaseActivity {
         setContentView(R.layout.activity_audio_player);
         SharedPreferencesUtils.get().init(this);
         init();
+
+        lastInit();
     }
 
 
@@ -90,13 +103,18 @@ public class AudioPlayerActivity extends BaseActivity {
         mPreButton=(ImageView)findViewById(R.id.audio_play_pre_button);
         mNextButton=(ImageView)findViewById(R.id.audio_play_next_button);
         mPlayButton=(ImageView)findViewById(R.id.audio_play_button);
+        mInfoLayout=(LinearLayout)findViewById(R.id.audio_control_info_layout);
+        mInfoControl=(ImageView)findViewById(R.id.audio_info_control_btn);
+        mOrderControl=(TextView)findViewById(R.id.audio_control_order);
 
         //set listener
         mSeekBar.setOnSeekBarChangeListener(mOnSeekBarChangeListener);
         mPreButton.setOnClickListener(mOnClickListener);
         mNextButton.setOnClickListener(mOnClickListener);
         mPlayButton.setOnClickListener(mOnClickListener);
-        ;
+        mInfoControl.setOnClickListener(mOnClickListener);
+        mOrderControl.setOnClickListener(mOnClickListener);
+
         //init view on viewpager
         LinearLayout linearLayout=(LinearLayout)audioList.findViewById(R.id.audio_list_layout);
         mAudioListManager=new AudioListManager(this,linearLayout);
@@ -104,7 +122,13 @@ public class AudioPlayerActivity extends BaseActivity {
 
         //
         mLyricsView=(LyricsView)audioLyrics.findViewById(R.id.audio_lyrics_view);
+        mPopupMenu = new PopupMenu(this,mOrderControl);
+        mPopupMenu.getMenuInflater().inflate(R.menu.audio_order_menu,mPopupMenu.getMenu());
+        mPopupMenu.setOnMenuItemClickListener(mOnMenuItemClickListener);
+    }
 
+    private void lastInit(){
+        setControlInfo(SharedPreferencesUtils.get().isShowInfo());
         //last we connect audioplayer service
         AudioPlayerManager.get().connect(this,mConnectionListener);
     }
@@ -168,8 +192,38 @@ public class AudioPlayerActivity extends BaseActivity {
                 case R.id.audio_play_button:
                     mHandler.sendEmptyMessage(MSG_PLAYER_PLAY);
                     break;
+                case R.id.audio_info_control_btn:
+                    setControlInfo(!SharedPreferencesUtils.get().isShowInfo());
+                    break;
+                case R.id.audio_control_order:
+                    mPopupMenu.show();
+                    break;
                 default:   break;
             }
+        }
+    };
+
+    private PopupMenu.OnMenuItemClickListener mOnMenuItemClickListener=new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            Message message=Message.obtain();
+            message.what=MSG_SET_ORDER;
+            message.arg2=0;
+            switch (item.getItemId()){
+                case R.id.play_order_single:
+                    message.arg1=PLAY_ORDER_SINGLE;
+                    break;
+                case R.id.play_order_order:
+                    message.arg1=PLAY_ORDER_ORDER;
+                    break;
+                case R.id.play_order_random:
+                    message.arg1=PLAY_ORDER_RANDOM;
+                   break;
+                default:
+                    return false;
+            }
+            mHandler.sendMessage(message);
+            return true;
         }
     };
 
@@ -179,6 +233,11 @@ public class AudioPlayerActivity extends BaseActivity {
         public void onConnected(AudioPlayerManager manager) {
             mAudioPlayerManager=manager;  //very importance
             mAudioPlayerManager.setAudioPlayerListener(mAudioPlayerListener);
+            Message message=Message.obtain();
+            message.what=MSG_SET_ORDER;
+            message.arg1=SharedPreferencesUtils.get().getPlayOrder();
+            message.arg2=1;
+            mHandler.sendMessage(message);
             mHandler.sendEmptyMessage(MSG_BUILD_LIST);
         }
 
@@ -260,6 +319,9 @@ public class AudioPlayerActivity extends BaseActivity {
                     break;
                 case MSG_SYNC_STATE:
                     handleSyncState(msg.arg1);
+                    break;
+                case MSG_SET_ORDER:
+                    handleControlOrder(msg.arg1,msg.arg2);
                     break;
                 default:   break;
             }
@@ -390,6 +452,32 @@ public class AudioPlayerActivity extends BaseActivity {
         }
     }
 
+    private void handleControlOrder(int order,int force){
+        if(mAudioPlayerManager==null){
+            printLog("setControlOrder AudioPlayerManager is null");
+            return ;
+        }
+        //
+        if(force==0&&order==SharedPreferencesUtils.get().getPlayOrder()){
+            printLog("play order had set,order = "+order);
+            return;
+        }
+        switch (order){
+            case PLAY_ORDER_SINGLE:
+                mOrderControl.setText("单曲");
+                break;
+            case PLAY_ORDER_ORDER:
+                mOrderControl.setText("顺序");
+                break;
+            case PLAY_ORDER_RANDOM:
+                mOrderControl.setText("随机");
+                break;
+            default: break;
+        }
+        mAudioPlayerManager.setPlayOrder(order);
+        SharedPreferencesUtils.get().setPlayOrder(order);
+    }
+
     private void setDurationInfo(){
         int duration=mAudioPlayerManager.getDuration();
         int position=mAudioPlayerManager.getCurrentPosition();
@@ -410,6 +498,16 @@ public class AudioPlayerActivity extends BaseActivity {
         mAudioListManager.setItemState(isPlay);
     }
 
+    private void setControlInfo(boolean isShow){
+        if(isShow){
+            mInfoLayout.setVisibility(View.VISIBLE);
+            mInfoControl.setImageResource(R.mipmap.audio_control_retract);
+        }else{
+            mInfoLayout.setVisibility(View.GONE);
+            mInfoControl.setImageResource(R.mipmap.audio_control_launch);
+        }
+        SharedPreferencesUtils.get().setShowInfo(isShow);
+    }
 
     /**
      * 按下返回键时调用，弹出提示框，询问用户是否真的退出

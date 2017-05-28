@@ -19,4 +19,9 @@
 
     <string name="audio_lyric_text">词</string>
 
+    <string name="audio_play_order_default">顺序</string>
+
+    <string name="audio_play_order_one">单曲循环</string>
+    <string name="audio_play_order_two">顺序播放</string>
+    <string name="audio_play_order_three">随机播放</string>
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+     >
+
+    <item
+        android:id="@+id/play_order_single"
+        android:orderInCategory="100"
+        android:title="@string/audio_play_order_one">
+    </item>
+
+    <item
+        android:id="@+id/play_order_order"
+        android:orderInCategory="100"
+        android:title="@string/audio_play_order_two">
+    </item>
+
+    <item
+        android:id="@+id/play_order_random"
+        android:orderInCategory="100"
+        android:title="@string/audio_play_order_three">
+    </item>
+</menu>

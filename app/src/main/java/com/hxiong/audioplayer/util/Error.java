@@ -12,5 +12,6 @@ public class Error {
     //return code value
     public static final int RETURN_ERROR = -1;
     public static final int RETURN_OK = 0;
-    public static final int RETURN_ALREADY = 0;
+    public static final int RETURN_ALREADY = 1;
+
 }

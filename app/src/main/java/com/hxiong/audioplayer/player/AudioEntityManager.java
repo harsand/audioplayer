@@ -11,6 +11,7 @@ import com.hxiong.audioplayer.util.Error;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Created by hxiong on 2017/5/14 10:40.
@@ -19,11 +20,17 @@ import java.util.HashMap;
 
 public class AudioEntityManager {
 
+    protected  static final int PLAY_ORDER_SINGLE = 0;
+    protected  static final int PLAY_ORDER_ORDER= 1;
+    protected  static final int PLAY_ORDER_RANDOM= 2;
+
     private Context mContext;
     private Object mLock;   //ops need lock
     private String curAudioListName;
     private int curPlayId;
     private HashMap<String,ArrayList<AudioEntity>> mAudioListMap;
+    private Random mRandom;
+    private int mPlayOrder;
 
     public AudioEntityManager(Context context){
         this.mContext=context;
@@ -31,6 +38,8 @@ public class AudioEntityManager {
         curAudioListName=DefaultValue.DEFAULT_AUDIO_LIST_NAME;
         curPlayId=DefaultValue.DEFAULT_AUDIO_PLAY_ID;
         mAudioListMap=new HashMap<String,ArrayList<AudioEntity>>();
+        mRandom=new Random();
+        mPlayOrder=PLAY_ORDER_ORDER;
     }
 
     public void init(){
@@ -73,25 +82,56 @@ public class AudioEntityManager {
     }
 
     public int getNextPlayId(){
+        return getNextPlayId(mPlayOrder);
+    }
+
+    public int getNextPlayId(int order){
         synchronized (mLock){
             ArrayList<AudioEntity> list = mAudioListMap.get(curAudioListName);
             if (list != null) {
-                return calculateOrder(list.size(),0);
+                return calculateByOrder(list.size(),order);
             }
             return curPlayId;  //return current play item
+        }
+    }
+
+    public int setPlayOrder(int order){
+        synchronized (mLock) {
+            if(order==mPlayOrder) {
+                return Error.RETURN_ALREADY;
+            }
+            mPlayOrder=order;
+            return Error.RETURN_OK;
+        }
+    }
+
+    public int getPlayOrder(){
+        synchronized (mLock){
+            return mPlayOrder;
         }
     }
 
     /**
      * 获取下一首个的方式，目前是顺序
      * @param size  列表的大小
-     * @param type 获取的方式
+     * @param order 获取的方式
      * @return
      */
-    private int calculateOrder(int size,int type){
-        int order=curPlayId+1;
-        order=order>size?0:order;
-        return order;
+    private int calculateByOrder(int size,int order){
+        int playId=0;
+        switch (order){
+            case PLAY_ORDER_SINGLE:
+                playId=curPlayId;
+                break;
+            case PLAY_ORDER_ORDER:
+                playId=curPlayId+1;
+                playId=playId>=size?0:playId;
+                break;
+            case PLAY_ORDER_RANDOM:
+                playId=mRandom.nextInt(1000)%size;
+                break;
+        }
+        return playId;
     }
 
     public String getAudioEntityPath(int index){

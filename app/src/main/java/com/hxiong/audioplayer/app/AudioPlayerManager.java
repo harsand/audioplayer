@@ -244,6 +244,17 @@ public class AudioPlayerManager {
         }
     }
 
+    public int setPlayOrder(int order){
+        if(isServiceAlive()){
+            try {
+                return mAudioPlayer.setPlayOrder(order);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return Error.RETURN_ERROR;
+    }
+
     private boolean isServiceAlive(){
         if(mAudioPlayer==null){
             printLog("audio player service is not init.");

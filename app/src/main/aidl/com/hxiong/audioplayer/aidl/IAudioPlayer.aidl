@@ -50,6 +50,8 @@ interface IAudioPlayer {
 
         int setLyricsColor(int color);
 
+        int setPlayOrder(int order);
+
         //ops
         int start();
         int pause();

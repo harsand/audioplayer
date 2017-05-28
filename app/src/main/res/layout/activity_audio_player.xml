@@ -45,88 +45,129 @@
         android:background="@color/audio_control_bg_color"
         android:orientation="vertical"
         >
-        <TextView
-            android:id="@+id/audio_view_name"
+           <LinearLayout
+            android:id="@+id/audio_control_info_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:lines="1"
-            android:ellipsize="end"
-            android:textSize="@dimen/audio_name_text_size"
-            android:textColor="@color/audio_name_text_color"
-            android:text="@string/audio_display_name"
-            />
-        <TextView
-            android:id="@+id/audio_view_singer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/audio_control_margin"
-            android:lines="1"
-            android:ellipsize="end"
-            android:textSize="@dimen/audio_singer_text_size"
-            android:textColor="@color/audio_singer_text_color"
-            android:text="@string/audio_singer_name"
-            />
-            <RelativeLayout
+            android:orientation="vertical"
+            >
+            <TextView
+                android:id="@+id/audio_view_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/audio_time_margin_top">
-                <TextView
-                    android:id="@+id/audio_view_start_time"
-                    android:layout_width="wrap_content"
+                android:gravity="center_horizontal"
+                android:lines="1"
+                android:ellipsize="end"
+                android:textSize="@dimen/audio_name_text_size"
+                android:textColor="@color/audio_name_text_color"
+                android:text="@string/audio_display_name"
+                />
+            <TextView
+                android:id="@+id/audio_view_singer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/audio_control_margin"
+                android:lines="1"
+                android:ellipsize="end"
+                android:textSize="@dimen/audio_singer_text_size"
+                android:textColor="@color/audio_singer_text_color"
+                android:text="@string/audio_singer_name"
+                />
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginLeft="@dimen/audio_control_margin"
-                    android:textSize="@dimen/audio_time_text_size"
-                    android:textColor="@color/audio_time_text_color"
-                    android:text="@string/audio_start_time_text"/>
-                <TextView
-                    android:id="@+id/audio_view_total_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="@dimen/audio_control_margin"
-                    android:textSize="@dimen/audio_time_text_size"
-                    android:textColor="@color/audio_time_text_color"
-                    android:text="@string/audio_total_time_text"/>
-            </RelativeLayout>
-          <SeekBar
-              android:id="@+id/audio_player_seek_bar"
+                    android:layout_marginTop="@dimen/audio_time_margin_top">
+                    <TextView
+                        android:id="@+id/audio_view_start_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="@dimen/audio_control_margin"
+                        android:textSize="@dimen/audio_time_text_size"
+                        android:textColor="@color/audio_time_text_color"
+                        android:text="@string/audio_start_time_text"/>
+                    <TextView
+                        android:id="@+id/audio_view_total_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/audio_control_margin"
+                        android:textSize="@dimen/audio_time_text_size"
+                        android:textColor="@color/audio_time_text_color"
+                        android:text="@string/audio_total_time_text"/>
+                </RelativeLayout>
+                <SeekBar
+                  android:id="@+id/audio_player_seek_bar"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="@dimen/audio_seek_bar_padding"
+                  android:paddingRight="@dimen/audio_seek_bar_padding"
+                  android:progressDrawable="@drawable/player_seekbar_style"
+                  android:thumb="@drawable/player_seekbar_thumb"/>
+           </LinearLayout>
+          <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:paddingLeft="@dimen/audio_seek_bar_padding"
-              android:paddingRight="@dimen/audio_seek_bar_padding"
-              android:progressDrawable="@drawable/player_seekbar_style"
-              android:thumb="@drawable/player_seekbar_thumb"/>
-          <RelativeLayout
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content">
-              <ImageView
-                  android:id="@+id/audio_play_button"
+              android:gravity="center_vertical"
+              android:orientation="horizontal">
+              <RelativeLayout
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_centerInParent="true"
-                  android:background="@drawable/audio_play_selector"
-                  android:src="@mipmap/audio_stop"/>
+                  android:layout_weight="1">
+                  <ImageView
+                      android:id="@+id/audio_info_control_btn"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:padding="@dimen/audio_control_button_padding"
+                      android:layout_centerHorizontal="true"
+                      android:background="@drawable/control_button_selector"
+                      android:src="@mipmap/audio_control_launch"/>
+              </RelativeLayout>
+
               <ImageView
-                  android:id="@+id/audio_play_pre_button"
+                      android:id="@+id/audio_play_pre_button"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerHorizontal="true"
+                      android:background="@drawable/audio_button_selector"
+                      android:src="@mipmap/audio_play_pre"/>
+
+              <ImageView
+                      android:id="@+id/audio_play_button"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="@dimen/audio_play_button_margin"
+                      android:layout_marginRight="@dimen/audio_play_button_margin"
+                      android:background="@drawable/audio_play_selector"
+                      android:src="@mipmap/audio_stop"/>
+
+              <ImageView
+                      android:id="@+id/audio_play_next_button"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerHorizontal="true"
+                      android:background="@drawable/audio_button_selector"
+                      android:src="@mipmap/audio_play_next"/>
+
+              <RelativeLayout
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_centerVertical="true"
-                  android:layout_toLeftOf="@+id/audio_play_button"
-                  android:layout_marginRight="@dimen/audio_play_button_margin"
-                  android:background="@drawable/audio_button_selector"
-                  android:src="@mipmap/audio_play_pre"/>
-              <ImageView
-                  android:id="@+id/audio_play_next_button"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_centerVertical="true"
-                  android:layout_toRightOf="@+id/audio_play_button"
-                  android:layout_marginLeft="@dimen/audio_play_button_margin"
-                  android:background="@drawable/audio_button_selector"
-                  android:src="@mipmap/audio_play_next"/>
-          </RelativeLayout>
+                  android:layout_weight="1">
+                  <TextView
+                      android:id="@+id/audio_control_order"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerHorizontal="true"
+                      android:paddingTop="@dimen/audio_play_order_padding"
+                      android:paddingBottom="@dimen/audio_play_order_padding"
+                      android:padding="@dimen/audio_control_button_padding"
+                      android:background="@drawable/control_button_selector"
+                      android:textSize="@dimen/audio_order_text_size"
+                      android:textColor="@color/audio_play_order_color"
+                      android:text="@string/audio_play_order_default"
+                  />
+              </RelativeLayout>
+          </LinearLayout>
 
     </LinearLayout>
 

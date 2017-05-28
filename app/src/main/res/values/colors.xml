@@ -21,4 +21,7 @@
     <color name="notify_btn_normal_color">#0078cb78</color>
     <color name="notify_btn_press_color">#78cb78</color>
 
+    <color name="audio_play_order_color">#696d69</color>
+    <color name="control_btn_normal_color">#0078cb78</color>
+    <color name="control_btn_press_color">#78cb78</color>
 </resources>

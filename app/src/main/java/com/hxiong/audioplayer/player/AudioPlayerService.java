@@ -24,12 +24,12 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     private static final boolean ENABLE_LOG=true;
 
 
-
     private AudioPlayerBinder mBinder;
     private ArrayList<IAudioPlayerListener> mListener;
     private AudioEntityManager mAudioEntityManager;
     private AudioPlayer mAudioPlayer;
     private ScreenManager mScreenManager;
+    private boolean mMutex=true;
 
     @Override
     public void onCreate() {
@@ -202,6 +202,10 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         return 0;
     }
 
+    int setPlayOrder(int order){
+        return mAudioEntityManager.setPlayOrder(order);
+    }
+
     //ops
     int start(){
         return  mAudioPlayer.start();
@@ -249,16 +253,16 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     }
 
     private boolean doComletion(){
-        return playNextAudio(0);
+        int playId=mAudioEntityManager.getNextPlayId();//顺序（或者随机）播放下一首歌
+        return playAudio(playId);
     }
 
     /**
      *
-     * @param order
      * @return
      */
-    private boolean playNextAudio(int order){ //顺序（或者随机）播放下一首歌
-        int nextPlayId=mAudioEntityManager.getNextPlayId();
+    private boolean playNextAudio(){
+        int nextPlayId=mAudioEntityManager.getNextPlayId(AudioEntityManager.PLAY_ORDER_ORDER);
         return playAudio(nextPlayId);
     }
 
@@ -284,13 +288,13 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                  doPlay();
                  break;
              case ScreenManager.INTENT_EXTRA_NEXT_ID:
-                 playNextAudio(0);
+                 playNextAudio();
                  break;
              case ScreenManager.INTENT_EXTRA_LYRIC_ID:
 
                  break;
              case ScreenManager.INTENT_EXTRA_CLICKED_ID:
-
+                 sendBroadcast();
                  break;
              case ScreenManager.INTENT_EXTRA_DELETED_ID:
                  printLog("AudioPlayerService stopSelf().");
@@ -313,6 +317,16 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
             if(mAudioPlayer.pause()!=Error.RETURN_OK){
                 printLog("doPlay pause fail.");
             }
+        }
+    }
+
+    private void sendBroadcast(){
+        if(mMutex){
+            mMutex=false;
+            Intent intent=new Intent();
+            intent.setAction("com.hxiong.audioplayer.wakeup");
+            getBaseContext().sendBroadcast(intent);
+            mMutex=true;
         }
     }
 
@@ -358,17 +372,17 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
         @Override
         public int setCurAudioListName(String audioListName) throws RemoteException {
-            return mService==null?0:mService.setCurAudioListName(audioListName);
+            return mService==null?Error.RETURN_ERROR:mService.setCurAudioListName(audioListName);
         }
 
         @Override
         public int createAudioList(String audioListName) throws RemoteException {
-            return mService==null?0:mService.createAudioList(audioListName);
+            return mService==null?Error.RETURN_ERROR:mService.createAudioList(audioListName);
         }
 
         @Override
         public int destroyAudioList(String audioListName) throws RemoteException {
-            return mService==null?0:mService.destroyAudioList(audioListName);
+            return mService==null?Error.RETURN_ERROR:mService.destroyAudioList(audioListName);
         }
 
         @Override
@@ -383,12 +397,12 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
         @Override
         public int addAudioEntity(String audioListName, AudioEntity audioEntity) throws RemoteException {
-            return mService==null?0:mService.addAudioEntity(audioListName,audioEntity);
+            return mService==null?Error.RETURN_ERROR:mService.addAudioEntity(audioListName,audioEntity);
         }
 
         @Override
         public int removeAudioEntity(String audioListName, int index) throws RemoteException {
-            return mService==null?0:mService.removeAudioEntity(audioListName,index);
+            return mService==null?Error.RETURN_ERROR:mService.removeAudioEntity(audioListName,index);
         }
 
         @Override
@@ -398,22 +412,22 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
         @Override
         public int setDataSource(int playIndex) throws RemoteException {
-            return mService==null?0:mService.setDataSource(playIndex);
+            return mService==null?Error.RETURN_ERROR:mService.setDataSource(playIndex);
         }
 
         @Override
         public int getDuration() throws RemoteException {
-           return mService==null?0:mService.getDuration();
+           return mService==null?Error.RETURN_ERROR:mService.getDuration();
         }
 
         @Override
         public int getCurrentPosition() throws RemoteException {
-            return mService==null?0:mService.getCurrentPosition();
+            return mService==null?Error.RETURN_ERROR:mService.getCurrentPosition();
         }
 
         @Override
         public int seekTo(int msec) throws RemoteException {
-             return mService==null?0:mService.seekTo(msec);
+             return mService==null?Error.RETURN_ERROR:mService.seekTo(msec);
         }
 
         @Override
@@ -428,27 +442,32 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
 
         @Override
         public int setLyricsVisible(boolean isVisible) throws RemoteException {
-            return mService==null?0:mService.setLyricsVisible(isVisible);
+            return mService==null?Error.RETURN_ERROR:mService.setLyricsVisible(isVisible);
         }
 
         @Override
         public int setLyricsColor(int color) throws RemoteException {
-            return mService==null?0:mService.setLyricsColor(color);
+            return mService==null?Error.RETURN_ERROR:mService.setLyricsColor(color);
+        }
+
+        @Override
+        public int setPlayOrder(int order) throws RemoteException {
+            return mService==null?Error.RETURN_ERROR:mService.setPlayOrder(order);
         }
 
         @Override
         public int start() throws RemoteException {
-            return mService==null?0:mService.start();
+            return mService==null?Error.RETURN_ERROR:mService.start();
         }
 
         @Override
         public int pause() throws RemoteException {
-            return mService==null?0:mService.pause();
+            return mService==null?Error.RETURN_ERROR:mService.pause();
         }
 
         @Override
         public int stop() throws RemoteException {
-            return mService==null?0:mService.stop();
+            return mService==null?Error.RETURN_ERROR:mService.stop();
         }
     }
 

@@ -14,6 +14,10 @@ public class SharedPreferencesUtils {
 
       public static final String AUDIO_PLAYER_ITEM="audio_player_item";
 
+      public static final String AUDIO_CONTROL_FLAG="audio_control_flag";
+
+      public static final String AUDIO_ORDER_FLAG="audio_order_flag";
+
       private SharedPreferences mSharedPreferences;
 
        private static SharedPreferencesUtils mSharedPreferencesUtils;
@@ -47,4 +51,32 @@ public class SharedPreferencesUtils {
         }
         return false;
     }
+
+    public boolean isShowInfo(){
+        return mSharedPreferences==null?false:mSharedPreferences.getBoolean(AUDIO_CONTROL_FLAG,false);
+    }
+
+    public boolean setShowInfo(boolean isShow){
+        if(mSharedPreferences!=null){
+            Editor editor=mSharedPreferences.edit();
+            editor.putBoolean(AUDIO_CONTROL_FLAG,isShow);
+            return editor.commit();
+        }
+        return false;
+    }
+
+    public int getPlayOrder(){
+        return mSharedPreferences==null?1:mSharedPreferences.getInt(AUDIO_ORDER_FLAG,1);
+    }
+
+    public boolean setPlayOrder(int order){
+        if(mSharedPreferences!=null){
+            Editor editor=mSharedPreferences.edit();
+            editor.putInt(AUDIO_ORDER_FLAG,order);
+            return editor.commit();
+        }
+        return false;
+    }
+
+
 }

@@ -40,4 +40,9 @@
     <dimen name="notify_title_text_size">18sp</dimen>
     <dimen name="notify_singer_text_size">12sp</dimen>
 
+    <dimen name="audio_play_order_padding">5dp</dimen>
+    <dimen name="audio_control_button_margin">8dp</dimen>
+    <dimen name="audio_order_text_size">16sp</dimen>
+    <dimen name="audio_control_button_padding">8dp</dimen>
+
 </resources>
