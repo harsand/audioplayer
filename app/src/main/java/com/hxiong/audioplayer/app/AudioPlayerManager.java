@@ -255,6 +255,17 @@ public class AudioPlayerManager {
         return Error.RETURN_ERROR;
     }
 
+    public int setLyricsVisible(boolean isVisible){
+        if(isServiceAlive()){
+            try {
+                return mAudioPlayer.setLyricsVisible(isVisible);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return Error.RETURN_ERROR;
+    }
+
     private boolean isServiceAlive(){
         if(mAudioPlayer==null){
             printLog("audio player service is not init.");

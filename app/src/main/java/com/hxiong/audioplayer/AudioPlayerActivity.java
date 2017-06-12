@@ -73,7 +73,6 @@ public class AudioPlayerActivity extends BaseActivity {
         setContentView(R.layout.activity_audio_player);
         SharedPreferencesUtils.get().init(this);
         init();
-
         lastInit();
     }
 
@@ -129,6 +128,7 @@ public class AudioPlayerActivity extends BaseActivity {
 
     private void lastInit(){
         setControlInfo(SharedPreferencesUtils.get().isShowInfo());
+
         //last we connect audioplayer service
         AudioPlayerManager.get().connect(this,mConnectionListener);
     }
@@ -530,6 +530,22 @@ public class AudioPlayerActivity extends BaseActivity {
                         finish();   //退出
                     }
                 }).show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(mAudioPlayerManager!=null) {
+            mAudioPlayerManager.setLyricsVisible(false); //仅仅只是通知service 要隐藏桌面歌词
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAudioPlayerManager!=null) {
+            mAudioPlayerManager.setLyricsVisible(true); //仅仅只是通知service 可以显示桌面歌词了
+        }
     }
 
     @Override

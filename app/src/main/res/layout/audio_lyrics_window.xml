@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/window_lyric_desktop"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
+              android:layout_height="wrap_content"
+              android:padding="@dimen/audio_window_lyric_padding"
+              android:orientation="vertical"
+    >
+     <RelativeLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content">
+         <ImageView
+             android:id="@+id/window_lyric_lock_btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentLeft="true"
+             android:background="@drawable/window_button_selector"
+             android:src="@mipmap/audio_unlock"/>
+         <ImageView
+             android:id="@+id/window_lyric_close_btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentRight="true"
+             android:background="@drawable/window_button_selector"
+             android:src="@mipmap/audio_close"/>
+     </RelativeLayout>
+    <TextView
+        android:id="@+id/window_lyric_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/audio_window_lyric_padding"
+        android:textColor="@color/window_lyric_text_color"
+        android:lines="2"
+        android:ellipsize="marquee"
+        android:gravity="center_horizontal"
+        android:textSize="@dimen/audio_lyric_text_size"
+        android:text="@string/window_lyric_text"/>
 </LinearLayout>

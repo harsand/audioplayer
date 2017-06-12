@@ -24,4 +24,7 @@
     <string name="audio_play_order_one">单曲循环</string>
     <string name="audio_play_order_two">顺序播放</string>
     <string name="audio_play_order_three">随机播放</string>
+
+    <string name="window_lyric_text">欢迎使用桌面歌词</string>
+
 </resources>

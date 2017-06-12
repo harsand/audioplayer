@@ -24,4 +24,8 @@
     <color name="audio_play_order_color">#696d69</color>
     <color name="control_btn_normal_color">#0078cb78</color>
     <color name="control_btn_press_color">#78cb78</color>
+
+    <color name="window_btn_normal_color">#00e36f79</color>
+    <color name="window_btn_press_color">#e36f79</color>
+    <color name="window_lyric_text_color">#e36f79</color>
 </resources>

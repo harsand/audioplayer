@@ -45,4 +45,7 @@
     <dimen name="audio_order_text_size">16sp</dimen>
     <dimen name="audio_control_button_padding">8dp</dimen>
 
+    <dimen name="audio_window_lyric_padding">5dp</dimen>
+    <dimen name="audio_lyric_text_size">18sp</dimen>
+
 </resources>

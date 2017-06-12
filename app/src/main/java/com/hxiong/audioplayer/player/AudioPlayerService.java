@@ -2,7 +2,9 @@ package com.hxiong.audioplayer.player;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -79,6 +81,30 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     }
 
 
+    /**
+     * message define here
+     */
+    protected static final int MSG_UPDATE_LYRICS = 1;
+
+    protected static final int MSG_HIDDEN_DELAY = 2;
+
+    private Handler mHandler=new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case MSG_UPDATE_LYRICS:
+                    mScreenManager.updateDesktopLyric(msg.arg1,(String)msg.obj);
+                    break;
+                case MSG_HIDDEN_DELAY:
+                    mScreenManager.updateAlertWindow(false);
+                    break;
+                default:
+                    super.handleMessage(msg);
+                    break;
+            }
+        }
+    };
 
 
     //
@@ -86,6 +112,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
        if (mListener.contains(listener)) {
            printLog("listener has already added.");
            mScreenManager.notifyAppState(true);
+           mScreenManager.setLyricsVisible(false);//？？？
            return false;
        }
        try {
@@ -104,6 +131,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
        }
        mListener.add(listener);
        mScreenManager.notifyAppState(true);
+       mScreenManager.setLyricsVisible(false);
        return true;
     }
 
@@ -195,7 +223,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
     }
 
     int setLyricsVisible(boolean isVisible){
-        return 0;
+        return mScreenManager.setLyricsVisible(isVisible);
     }
 
     int setLyricsColor(int color){
@@ -241,6 +269,16 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                  }else{
                      notifyListener(AudioPlayer.EVENT_TYPE_ERROR, "error", arg1, arg2);  //发生了错误
                  }
+                 break;
+             case AudioPlayer.EVENT_TYPE_SYNC:
+                 if(arg2!=-1){   //if arg2 is not -1
+                     Message msg=Message.obtain();
+                     msg.what=MSG_UPDATE_LYRICS;
+                     msg.obj=arg0;
+                     msg.arg1=arg2;
+                     mHandler.sendMessage(msg);
+                 }
+                 notifyListener(event, arg0, arg1, arg2);
                  break;
              case AudioPlayer.EVENT_TYPE_STATE:
                  mScreenManager.updatePlayState(arg1);
@@ -291,7 +329,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                  playNextAudio();
                  break;
              case ScreenManager.INTENT_EXTRA_LYRIC_ID:
-
+                 mScreenManager.setDesktopLyric();
                  break;
              case ScreenManager.INTENT_EXTRA_CLICKED_ID:
                  sendBroadcast();
@@ -299,6 +337,12 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
              case ScreenManager.INTENT_EXTRA_DELETED_ID:
                  printLog("AudioPlayerService stopSelf().");
                  stopSelf();  //停止service
+                 break;
+             case ScreenManager.INTENT_EXTRA_MSG_DELAY:
+                 sendHiddenMessage(arg1);
+                 break;
+             case ScreenManager.INTENT_EXTRA_MSG_REMOVE:
+                 removeHiddenMessage();
                  break;
              default: break;
          }
@@ -327,6 +371,22 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
             intent.setAction("com.hxiong.audioplayer.wakeup");
             getBaseContext().sendBroadcast(intent);
             mMutex=true;
+        }
+    }
+
+    private void sendHiddenMessage(long delay){
+        try {
+            mHandler.sendEmptyMessageDelayed(MSG_HIDDEN_DELAY, delay);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void removeHiddenMessage(){
+        try {
+            mHandler.removeMessages(MSG_HIDDEN_DELAY);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
