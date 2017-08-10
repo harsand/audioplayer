@@ -57,4 +57,6 @@ interface IAudioPlayer {
         int pause();
         int stop();
 
+        //destroy function
+        int exit(int flag);
 }

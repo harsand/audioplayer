@@ -22,6 +22,7 @@ import com.hxiong.audioplayer.app.AudioListManager.OnPlayItemListener;
 import com.hxiong.audioplayer.app.AudioPlayerManager;
 import com.hxiong.audioplayer.app.AudioPlayerManager.AudioPlayerListener;
 import com.hxiong.audioplayer.app.AudioPlayerManager.ConnectionListener;
+import com.hxiong.audioplayer.app.SettingManager;
 import com.hxiong.audioplayer.bean.AudioEntity;
 import com.hxiong.audioplayer.util.CommonUtils;
 import com.hxiong.audioplayer.util.Error;
@@ -49,6 +50,7 @@ public class AudioPlayerActivity extends BaseActivity {
 
     private AudioListManager mAudioListManager;
     private AudioPlayerManager mAudioPlayerManager;
+    private SettingManager mSettingManager;
     private TextView mNameView;
     private TextView mArtistView;
     private TextView mPlayingTime;
@@ -118,6 +120,10 @@ public class AudioPlayerActivity extends BaseActivity {
         LinearLayout linearLayout=(LinearLayout)audioList.findViewById(R.id.audio_list_layout);
         mAudioListManager=new AudioListManager(this,linearLayout);
         mAudioListManager.setOnPlayItemListener(mOnPlayItemListener);
+
+        //init setting
+        LinearLayout settingLayout=(LinearLayout)audioSetting.findViewById(R.id.audio_setting_layout);
+        mSettingManager=new SettingManager(this,settingLayout);
 
         //
         mLyricsView=(LyricsView)audioLyrics.findViewById(R.id.audio_lyrics_view);
@@ -552,6 +558,11 @@ public class AudioPlayerActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         if(mAudioPlayerManager!=null) {
+            if(mAudioPlayerManager.getPlayerState()!=AudioPlayerManager.PLAYER_STATE_START&&
+                    SharedPreferencesUtils.get().getExitFlag()){
+                printLog("audio player service will exit.");
+                mAudioPlayerManager.exit(0);
+            }
             mAudioPlayerManager.disconnect();
         }
     }

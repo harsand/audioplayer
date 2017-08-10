@@ -1,6 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-</RelativeLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/audio_setting_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@drawable/audio_item_splitbar"
+        android:showDividers="middle"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/audio_setting_item_padding">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:textSize="@dimen/audio_setting_item_size"
+                android:text="@string/setting_exit_text"
+                android:layout_centerVertical="true"/>
+            <Switch
+                android:id="@+id/switch_exit_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:typeface="normal"
+                android:textOn="@string/setting_exit_yes_text"
+                android:textOff="@string/setting_exit_no_text"
+                android:switchTextAppearance="@style/Setting.TextAppearance"
+                android:checked="false"
+                android:switchMinWidth="@dimen/audio_setting_switch_width"
+                android:layout_centerVertical="true"
+                />
+        </RelativeLayout>
+    </LinearLayout>
+</ScrollView>

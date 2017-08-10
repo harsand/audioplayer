@@ -18,6 +18,8 @@ public class SharedPreferencesUtils {
 
       public static final String AUDIO_ORDER_FLAG="audio_order_flag";
 
+      public static final String AUDIO_EXIT_FLAG="audio_exit_flag";
+
       private SharedPreferences mSharedPreferences;
 
        private static SharedPreferencesUtils mSharedPreferencesUtils;
@@ -35,7 +37,9 @@ public class SharedPreferencesUtils {
      * @param context
      */
     public void init(Context context){
-        mSharedPreferences=context.getSharedPreferences(AUDIO_SHARE_NAME,Context.MODE_PRIVATE);
+        if(mSharedPreferences==null) {
+            mSharedPreferences = context.getSharedPreferences(AUDIO_SHARE_NAME, Context.MODE_PRIVATE);
+        }
     }
 
 
@@ -78,5 +82,16 @@ public class SharedPreferencesUtils {
         return false;
     }
 
+    public boolean setExitFlag(boolean isExit){
+        if(mSharedPreferences!=null){
+            Editor editor=mSharedPreferences.edit();
+            editor.putBoolean(AUDIO_EXIT_FLAG,isExit);
+            return editor.commit();
+        }
+        return false;
+    }
 
+    public boolean getExitFlag(){
+        return mSharedPreferences==null?false:mSharedPreferences.getBoolean(AUDIO_EXIT_FLAG,false);
+    }
 }

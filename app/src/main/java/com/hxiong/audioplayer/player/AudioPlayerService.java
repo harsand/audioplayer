@@ -245,6 +245,16 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         return mAudioPlayer.stop();
     }
 
+    public int exit(int flag){
+        try{
+            mAudioPlayer.stop();   //try to stop player
+            stopSelf();            //stop service
+            return Error.RETURN_OK;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return Error.RETURN_ERROR;
+    }
     //
     void notifyListener(int event, String arg0, int arg1, int arg2){
         try {
@@ -528,6 +538,11 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         @Override
         public int stop() throws RemoteException {
             return mService==null?Error.RETURN_ERROR:mService.stop();
+        }
+
+        @Override
+        public int exit(int flag) throws RemoteException {
+            return mService==null?Error.RETURN_ERROR:mService.exit(flag);
         }
     }
 

@@ -27,4 +27,8 @@
 
     <string name="window_lyric_text">欢迎使用桌面歌词</string>
 
+    <string name="setting_exit_text">退出应用时关闭播放器</string>
+    <string name="setting_exit_yes_text">是</string>
+    <string name="setting_exit_no_text">否</string>
+
 </resources>

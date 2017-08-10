@@ -98,6 +98,18 @@ public class AudioPlayerManager {
         mConnectionListener=null;  //need to set null
     }
 
+
+    public int exit(int flag){
+        if(isServiceAlive()){
+            try {
+                return mAudioPlayer.exit(flag);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return Error.RETURN_ERROR;
+    }
+
     public void setAudioPlayerListener(AudioPlayerListener listener){
         mAudioPlayerListener=listener;
     }
@@ -313,8 +325,8 @@ public class AudioPlayerManager {
             mContext=null;     //need to set null
             mConnectionListener=null;  //need to set null
         }
-    }
-   ;
+    };
+
     private boolean startPlayerService(Context context){
         try {
             Intent intent = new Intent(AUDIO_PLAYER_SERVICE);
