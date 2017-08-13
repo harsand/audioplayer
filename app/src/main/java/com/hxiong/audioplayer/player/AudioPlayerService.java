@@ -20,7 +20,9 @@ import java.util.ArrayList;
  * Email 2509477698@qq.com
  */
 
-public class AudioPlayerService extends Service implements AudioPlayer.AudioPlayerListener,ScreenManager.ScreenListener{
+public class AudioPlayerService extends Service implements
+        AudioPlayer.AudioPlayerListener,ScreenManager.ScreenListener,AudioEntityManager.AudioEntityListener{
+
 
     private static final String TAG="AudioPlayerService";
     private static final boolean ENABLE_LOG=true;
@@ -41,6 +43,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         mAudioEntityManager=new AudioEntityManager(getBaseContext());
         mAudioPlayer = new AudioPlayer();
         mScreenManager=new ScreenManager(getBaseContext());
+        mAudioEntityManager.setAudioEntityListener(this);
         mAudioEntityManager.init();
         mAudioPlayer.setAudioPlayerListener(this);
         mAudioPlayer.init();
@@ -74,6 +77,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
             mListener.clear();
             mAudioPlayer.release();
             mScreenManager.destroy();
+            mAudioEntityManager.destroy();
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -266,21 +270,22 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         }
     }
 
+    //---------------------------implements AudioPlayerListener------------------------------
     @Override
     public void onNotifyListener(int event, String arg0, int arg1, int arg2) {
          switch (event){
-             case AudioPlayer.EVENT_TYPE_PREPARE:
+             case IAudioPlayerListener.EVENT_TYPE_PREPARE:
                  mScreenManager.updateAudioInfo(mAudioEntityManager.getCurAudioEntity());
                  notifyListener(event, arg0, arg1, arg2);
                  break;
-             case AudioPlayer.EVENT_TYPE_COMPLETION:
+             case IAudioPlayerListener.EVENT_TYPE_COMPLETION:
                  if(doComletion()){
                      notifyListener(event, arg0, arg1, arg2);
                  }else{
-                     notifyListener(AudioPlayer.EVENT_TYPE_ERROR, "error", arg1, arg2);  //发生了错误
+                     notifyListener(IAudioPlayerListener.EVENT_TYPE_ERROR, "error", arg1, arg2);  //发生了错误
                  }
                  break;
-             case AudioPlayer.EVENT_TYPE_SYNC:
+             case IAudioPlayerListener.EVENT_TYPE_SYNC:
                  if(arg2!=-1){   //if arg2 is not -1
                      Message msg=Message.obtain();
                      msg.what=MSG_UPDATE_LYRICS;
@@ -290,7 +295,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
                  }
                  notifyListener(event, arg0, arg1, arg2);
                  break;
-             case AudioPlayer.EVENT_TYPE_STATE:
+             case IAudioPlayerListener.EVENT_TYPE_STATE:
                  mScreenManager.updatePlayState(arg1);
                  notifyListener(event, arg0, arg1, arg2);
                  break;
@@ -329,6 +334,7 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
         return true;
     }
 
+    //---------------------------implements ScreenListener---------------------------------
     @Override
     public void onScreenNotify(int event, String arg0, int arg1) {
          switch (event){
@@ -382,6 +388,12 @@ public class AudioPlayerService extends Service implements AudioPlayer.AudioPlay
             getBaseContext().sendBroadcast(intent);
             mMutex=true;
         }
+    }
+
+    //---------------------------implements AudioEntityListener------------------------------
+    @Override
+    public void onAudioEntityNotify(int event, String arg0, int arg1) {
+        notifyListener(event,arg0,arg1,0);
     }
 
     private void sendHiddenMessage(long delay){

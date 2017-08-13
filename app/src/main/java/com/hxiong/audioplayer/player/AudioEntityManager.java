@@ -2,13 +2,25 @@ package com.hxiong.audioplayer.player;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.hxiong.audioplayer.aidl.IAudioPlayerListener;
 import com.hxiong.audioplayer.bean.AudioEntity;
 import com.hxiong.audioplayer.util.DefaultValue;
 import com.hxiong.audioplayer.util.Error;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -19,6 +31,10 @@ import java.util.Random;
  */
 
 public class AudioEntityManager {
+
+    protected static final String CURR_PLAY_ID_FILE="/cur_id";
+
+    protected static final int MSG_INIT_AUDIO_LIST = 1;  //获取歌曲列表，可能会比较耗时，所以放在新的线程处理
 
     protected  static final int PLAY_ORDER_SINGLE = 0;
     protected  static final int PLAY_ORDER_ORDER= 1;
@@ -32,6 +48,12 @@ public class AudioEntityManager {
     private Random mRandom;
     private int mPlayOrder;
 
+    //管理歌曲列表，需要一个新的线程
+    private HandlerThread mHandlerThread;
+    private AudioEntityHandle mAudioEntityHandle;
+    private SQLiteManager mSQLiteManager;
+    private AudioEntityListener mAudioEntityListener;
+
     public AudioEntityManager(Context context){
         this.mContext=context;
         mLock=new Object();
@@ -43,9 +65,21 @@ public class AudioEntityManager {
     }
 
     public void init(){
-        ArrayList<AudioEntity> list= getDefaultAudioList();
-        mAudioListMap.put(DefaultValue.DEFAULT_AUDIO_LIST_NAME,list);
+        mHandlerThread=new HandlerThread("AudioEntityManager");
+        mHandlerThread.start();  //important
+        mAudioEntityHandle=new AudioEntityHandle(mHandlerThread.getLooper());
+        mSQLiteManager=new SQLiteManager(mContext);
+        mAudioEntityHandle.sendEmptyMessage(MSG_INIT_AUDIO_LIST);
+    }
 
+    public void setAudioEntityListener(AudioEntityListener listener){
+        mAudioEntityListener=listener;
+    }
+
+    private void notifyListener(int event,String arg0,int arg1){
+        if(mAudioEntityListener!=null){
+            mAudioEntityListener.onAudioEntityNotify(event, arg0, arg1);
+        }
     }
 
     public String[] getAudioListName(){
@@ -78,6 +112,7 @@ public class AudioEntityManager {
     public void setCurPlayId(int id){
         synchronized (mLock){
             curPlayId=id;
+            setCurIdToFile(curPlayId);
         }
     }
 
@@ -167,6 +202,47 @@ public class AudioEntityManager {
         }
     }
 
+    public void destroy(){
+         try{
+             mHandlerThread.quit();
+         }catch (Exception e){
+             e.printStackTrace();
+         }
+    }
+
+    /**
+     *
+     */
+    private class AudioEntityHandle extends Handler{
+
+        public AudioEntityHandle(Looper looper){
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case MSG_INIT_AUDIO_LIST:
+                    handleInitAudioList();
+                    break;
+                default:
+                    super.handleMessage(msg);
+                    break;
+            }
+        }
+    }
+
+    private void handleInitAudioList() {
+        synchronized (mLock){
+            ArrayList<AudioEntity> list = getDefaultAudioList();
+            mAudioListMap.put(DefaultValue.DEFAULT_AUDIO_LIST_NAME, list);
+            curPlayId=getCurIdFromFile();
+        }
+
+        //初始化列表完成之后，通知到app
+        notifyListener(IAudioPlayerListener.EVENT_TYPE_BUILD_LIST,"",0);
+    }
+
     private ArrayList<AudioEntity> getDefaultAudioList(){
         ArrayList<AudioEntity> audioList=new ArrayList<AudioEntity>();
         Cursor cursor = null;
@@ -197,7 +273,6 @@ public class AudioEntityManager {
         return audioList;
     }
 
-
     private void getAudioList(Cursor cursor, ArrayList<AudioEntity> audioList){
         while(cursor.moveToNext()){
             int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
@@ -224,5 +299,50 @@ public class AudioEntityManager {
             return  false;
         }
         return true;
+    }
+
+    private void setCurIdToFile(int playId){
+        FileOutputStream fous=null;
+        try{
+            File externalDir= Environment.getExternalStorageDirectory();
+            String curIdPath=externalDir.getPath()+CURR_PLAY_ID_FILE;
+            fous=new FileOutputStream(curIdPath);
+            DataOutputStream dous=new DataOutputStream(fous);
+            dous.writeInt(playId);
+            dous.flush();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                if(fous!=null) fous.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private int getCurIdFromFile(){
+        int curId=DefaultValue.DEFAULT_AUDIO_PLAY_ID;
+        FileInputStream fin=null;
+        try{
+            File externalDir= Environment.getExternalStorageDirectory();
+            String curIdPath=externalDir.getPath()+CURR_PLAY_ID_FILE;
+            fin=new FileInputStream(curIdPath);
+            DataInputStream din=new DataInputStream(fin);
+            curId=din.readInt();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try {
+                if(fin!=null) fin.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return curId;
+    }
+
+    public interface AudioEntityListener{
+        void onAudioEntityNotify(int event,String arg0,int arg1);
     }
 }

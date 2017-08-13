@@ -3,6 +3,7 @@ package com.hxiong.audioplayer.app;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.hxiong.audioplayer.R;
 import com.hxiong.audioplayer.bean.AudioEntity;
@@ -23,6 +24,7 @@ public class AudioListManager implements OnSpreadListener {
 
      private Context mContext;
 
+     private ScrollView mScrollView;
      private LinearLayout mLinearLayout;
      private ArrayList<SpreadLayout> mSpreadLayouts;
      private OnPlayItemListener mOnPlayItemListener;
@@ -31,8 +33,9 @@ public class AudioListManager implements OnSpreadListener {
      //上一次选择的item
      private int mSelectItem;
 
-     public AudioListManager(Context context, LinearLayout linearLayout){
+     public AudioListManager(Context context, ScrollView scrollView,LinearLayout linearLayout){
            this.mContext=context;
+           this.mScrollView=scrollView;
            this.mLinearLayout=linearLayout;
            this.mSpreadLayouts=new ArrayList<SpreadLayout>();
            this.mSelectItem=ITEM_UN_SELECTED;
@@ -64,6 +67,22 @@ public class AudioListManager implements OnSpreadListener {
         setSelectItemState(mSelectItem,SpreadLayout.ITEM_STATE_NORMAL);//取消上一次选择
         mSelectItem=playId;
         setSelectItemState(playId,SpreadLayout.ITEM_STATE_SELECT);//设置为选择状态
+        scrollToPosition(playId);
+    }
+
+    /**
+     * 歌曲列表滚动到当前播放歌曲的位置，必须在主线程中刷新
+     * @param pos
+     */
+    private void scrollToPosition(int pos){
+          try {
+              SpreadLayout spreadLayout = mSpreadLayouts.get(pos);
+              int scrollItemPos=(pos-3)>0?pos-3:0;//上面部分还可以看到其他歌曲
+              int yPos=spreadLayout.getHeight()*scrollItemPos;
+              mScrollView.scrollTo(0,yPos);
+          }catch (Exception e){
+              e.printStackTrace();
+          }
     }
 
     public void setItemState(boolean isPlay){

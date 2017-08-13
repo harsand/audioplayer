@@ -6,6 +6,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import com.hxiong.audioplayer.aidl.IAudioPlayerListener;
 import com.hxiong.audioplayer.util.CommonUtils;
 import com.hxiong.audioplayer.util.Error;
 import com.hxiong.audioplayer.util.LyricsList;
@@ -24,15 +25,6 @@ public class AudioPlayer {
       public static final int PLAYER_STATE_START = 3;
       public static final int PLAYER_STATE_PAUSE= 4;
       public static final int PLAYER_STATE_DESTROY = 5;
-
-      //notify event type
-      public static final int EVENT_TYPE_PREPARE = 0;
-      public static final int EVENT_TYPE_COMPLETION = 1;
-      public static final int EVENT_TYPE_SEEK_COMPLETE = 2;
-      public static final int EVENT_TYPE_INFO = 3;
-      public static final int EVENT_TYPE_ERROR = 4;
-      public static final int EVENT_TYPE_SYNC = 5;
-      public static final int EVENT_TYPE_STATE = 6;
 
       //AudioPlayerHandler msg
       public static final int MSG_INIT_LYRICS = 0;
@@ -54,33 +46,33 @@ public class AudioPlayer {
           mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
               @Override
               public void onPrepared(MediaPlayer mp) {
-                  onNotifyListener(EVENT_TYPE_PREPARE,"onPrepared",0,0);
+                  onNotifyListener(IAudioPlayerListener.EVENT_TYPE_PREPARE,"onPrepared",0,0);
               }
           });
           mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
               @Override
               public void onCompletion(MediaPlayer mp) {
                   stopPullLyrics();  //停止时间
-                  onNotifyListener(EVENT_TYPE_COMPLETION,"onCompletion",0,0);
+                  onNotifyListener(IAudioPlayerListener.EVENT_TYPE_COMPLETION,"onCompletion",0,0);
               }
           });
           mMediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
               @Override
               public void onSeekComplete(MediaPlayer mp) {
-                  onNotifyListener(EVENT_TYPE_SEEK_COMPLETE,"onSeekComplete",0,0);
+                  onNotifyListener(IAudioPlayerListener.EVENT_TYPE_SEEK_COMPLETE,"onSeekComplete",0,0);
               }
           });
           mMediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
               @Override
               public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                  onNotifyListener(EVENT_TYPE_INFO,"onInfo",what,extra);
+                  onNotifyListener(IAudioPlayerListener.EVENT_TYPE_INFO,"onInfo",what,extra);
                   return false;
               }
           });
           mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
               @Override
               public boolean onError(MediaPlayer mp, int what, int extra) {
-                  onNotifyListener(EVENT_TYPE_ERROR,"onError",what,extra);
+                  onNotifyListener(IAudioPlayerListener.EVENT_TYPE_ERROR,"onError",what,extra);
                   return false;
               }
           });
@@ -240,12 +232,12 @@ public class AudioPlayer {
 
       private void startPullLyrics(){
           mHandler.sendEmptyMessage(MSG_PULL_LYRICS);
-          onNotifyListener(EVENT_TYPE_STATE,"start",PLAYER_STATE_START,0);
+          onNotifyListener(IAudioPlayerListener.EVENT_TYPE_STATE,"start",PLAYER_STATE_START,0);
       }
 
       private void stopPullLyrics(){
           mHandler.removeMessages(MSG_PULL_LYRICS);
-          onNotifyListener(EVENT_TYPE_STATE,"pause",PLAYER_STATE_PAUSE,0);
+          onNotifyListener(IAudioPlayerListener.EVENT_TYPE_STATE,"pause",PLAYER_STATE_PAUSE,0);
       }
 
       private void pullLyrics(){
@@ -257,7 +249,7 @@ public class AudioPlayer {
                   lyricIndex=lyrics.getHitIndex();
                   lyric=lyrics.getHitLyric();
               }
-              onNotifyListener(EVENT_TYPE_SYNC, lyric, curPosition, lyricIndex);
+              onNotifyListener(IAudioPlayerListener.EVENT_TYPE_SYNC, lyric, curPosition, lyricIndex);
               mHandler.sendEmptyMessageDelayed(MSG_PULL_LYRICS, PLAYER_PULL_DELAY);  //after one second
           }
       }

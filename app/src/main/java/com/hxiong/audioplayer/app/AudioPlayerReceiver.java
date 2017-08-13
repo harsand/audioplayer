@@ -21,6 +21,7 @@ public class AudioPlayerReceiver extends BroadcastReceiver {
         //收到广播后，把AudioPlayerActivity 运行起来
         try {
             Intent activity = new Intent(context, AudioPlayerActivity.class);
+            activity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //
             context.startActivity(activity);
         }catch (Exception e){
             e.printStackTrace();

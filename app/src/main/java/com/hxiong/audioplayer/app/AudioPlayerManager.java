@@ -38,15 +38,6 @@ public class AudioPlayerManager {
     public static final int PLAYER_STATE_PAUSE= 4;
     public static final int PLAYER_STATE_DESTROY = 5;
 
-    //notify event type
-    public static final int EVENT_TYPE_PREPARE = 0;
-    public static final int EVENT_TYPE_COMPLETION = 1;
-    public static final int EVENT_TYPE_SEEK_COMPLETE = 2;
-    public static final int EVENT_TYPE_INFO = 3;
-    public static final int EVENT_TYPE_ERROR = 4;
-    public static final int EVENT_TYPE_SYNC = 5;
-    public static final int EVENT_TYPE_STATE = 6;
-
     private static AudioPlayerManager mAudioPlayerManager=new AudioPlayerManager();
     private IAudioPlayer mAudioPlayer;
     private AudioPlayerListener mAudioPlayerListener;

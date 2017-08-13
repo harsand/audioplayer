@@ -12,11 +12,13 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.hxiong.audioplayer.adapter.AudioPagerAdapter;
+import com.hxiong.audioplayer.aidl.IAudioPlayerListener;
 import com.hxiong.audioplayer.app.AudioListManager;
 import com.hxiong.audioplayer.app.AudioListManager.OnPlayItemListener;
 import com.hxiong.audioplayer.app.AudioPlayerManager;
@@ -118,7 +120,7 @@ public class AudioPlayerActivity extends BaseActivity {
 
         //init view on viewpager
         LinearLayout linearLayout=(LinearLayout)audioList.findViewById(R.id.audio_list_layout);
-        mAudioListManager=new AudioListManager(this,linearLayout);
+        mAudioListManager=new AudioListManager(this,(ScrollView)audioList,linearLayout);
         mAudioListManager.setOnPlayItemListener(mOnPlayItemListener);
 
         //init setting
@@ -258,33 +260,36 @@ public class AudioPlayerActivity extends BaseActivity {
         @Override
         public void onNotify(int event, String arg0, int arg1, int arg2) {
              switch (event){
-                 case AudioPlayerManager.EVENT_TYPE_PREPARE:
+                 case IAudioPlayerListener.EVENT_TYPE_PREPARE:
                      mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_COMPLETION:
+                 case IAudioPlayerListener.EVENT_TYPE_COMPLETION:
                      //mHandler.sendEmptyMessage(MSG_SYNC_PLAYER); //sync with player
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_SEEK_COMPLETE:
+                 case IAudioPlayerListener.EVENT_TYPE_SEEK_COMPLETE:
 
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_INFO:
+                 case IAudioPlayerListener.EVENT_TYPE_INFO:
 
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_ERROR:
+                 case IAudioPlayerListener.EVENT_TYPE_ERROR:
 
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_SYNC:
+                 case IAudioPlayerListener.EVENT_TYPE_SYNC:
                      Message message=Message.obtain();
                      message.what=MSG_SYNC_LYRICS;
                      message.arg1=arg1;
                      message.arg2=arg2;
                      mHandler.sendMessage(message);  //必须在主线程中刷新
                      break;
-                 case AudioPlayerManager.EVENT_TYPE_STATE:
+                 case IAudioPlayerListener.EVENT_TYPE_STATE:
                      Message msgState=Message.obtain();
                      msgState.what=MSG_SYNC_STATE;
                      msgState.arg1=arg1;   //是播放还是暂停状态
                      mHandler.sendMessage(msgState);  //必须在主线程中刷新
+                     break;
+                 case IAudioPlayerListener.EVENT_TYPE_BUILD_LIST:
+                     mHandler.sendEmptyMessage(MSG_BUILD_LIST); //service 已经把音乐列表初始化完成，或者音乐列表有改变
                      break;
                  default:  break;
              }
